@@ -202,6 +202,15 @@ export class FileRepository {
     return row ? toFile(row) : null;
   }
 
+  async restore(companyId: string, id: string, now: Date): Promise<FileRecord | null> {
+    const [row] = await this.db.query<FileRow>(
+      `UPDATE files SET archived_at = NULL, updated_at = $3
+        WHERE id = $1 AND company_id = $2 AND deleted_at IS NULL RETURNING ${FILE_COLS}`,
+      [id, companyId, now],
+    );
+    return row ? toFile(row) : null;
+  }
+
   // -------------------------------------------------------------- versions
   async createVersion(v: FileVersion): Promise<FileVersion> {
     await this.db.query(

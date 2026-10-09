@@ -17,5 +17,5 @@ COPY migrations ./migrations
 USER node
 EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=3s --retries=5 \
-  CMD wget -qO- http://127.0.0.1:8080/admin/health || exit 1
+  CMD wget -qO- "http://127.0.0.1:${PORT:-8080}/admin/health" || exit 1
 CMD ["node", "dist/main.js"]

@@ -383,6 +383,46 @@ export default async function fileRoutes(app: FastifyInstance) {
     },
   );
 
+  // ------------------------------------------------- POST /files/:id/restore
+  typed.post(
+    '/api/v1/files/:id/restore',
+    {
+      schema: {
+        tags: ['files'],
+        summary: 'Arxivlənmiş faylı bərpa et (idempotent)',
+        security: [{ bearerAuth: [] }],
+        params: IdParams,
+        response: { 200: FileSchema, ...errorResponses(401, 403, 404, 422) },
+      },
+      config: { permission: PERMISSIONS.FILES_WRITE },
+    },
+    async (request) => {
+      const auth = requireAuth(request);
+      const { id } = request.params;
+      return app.ctx.db.tx(async (tx) => {
+        const repos = createRepos(tx);
+        const before = await loadFileWith(repos, auth.companyId, id);
+        const restored = await repos.files.restore(auth.companyId, id, new Date());
+        if (!restored) throw ApiError.notFound(`File ${id} not found`);
+        await auditRequest(
+          app,
+          request,
+          {
+            action: 'file.restore',
+            resourceType: 'file',
+            resourceId: id,
+            before: { archivedAt: before.archivedAt?.toISOString() ?? null },
+            after: { archivedAt: null },
+          },
+          tx,
+        );
+        const status =
+          (await repos.files.latestExtractionStatuses(auth.companyId, [id])).get(id) ?? null;
+        return toFileResponse(restored, status);
+      });
+    },
+  );
+
   // ------------------------------------------------- POST /files/:id/reindex
   typed.post(
     '/api/v1/files/:id/reindex',

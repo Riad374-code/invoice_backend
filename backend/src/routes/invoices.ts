@@ -12,6 +12,7 @@ import { persistProposalForInvoice } from '../ledger/service.js';
 import { lowConfidenceFields, transitionInvoice, validateInvoice } from '../invoices/service.js';
 import { QUEUES } from '../jobs/types.js';
 import { requireAuth } from '../plugins/auth.js';
+import { StorageError } from '../storage/index.js';
 
 const Money = z.string().regex(/^-?\d+(\.\d+)?$/);
 const LineSchema = z.object({
@@ -242,6 +243,46 @@ export default async function invoiceRoutes(app: FastifyInstance) {
     async (request) => {
       const auth = requireAuth(request);
       return detail(app.ctx.repos, auth.companyId, await load(auth.companyId, request.params.id));
+    },
+  );
+
+  typed.get(
+    '/api/v1/invoices/:id/source',
+    {
+      schema: {
+        tags: ['invoices'],
+        summary: 'Qaimənin orijinal sənədi (yüklənmiş fayl); önbaxış üçün inline',
+        security: [{ bearerAuth: [] }],
+        params: IdParams,
+        response: errorResponses(401, 403, 404, 422, 503),
+      },
+      config: { permission: PERMISSIONS.INVOICES_READ },
+    },
+    async (request, reply) => {
+      const auth = requireAuth(request);
+      const inv = await load(auth.companyId, request.params.id);
+      const version = inv.sourceFileId
+        ? await app.ctx.repos.files.latestVersion(auth.companyId, inv.sourceFileId)
+        : null;
+      if (!version) throw ApiError.notFound('This invoice has no source document');
+      try {
+        const stream = await app.ctx.storage.getStream(version.storageKey);
+        return reply
+          .header('content-type', version.mime)
+          .header('content-length', version.size)
+          .header('content-disposition', 'inline')
+          .header('x-content-type-options', 'nosniff')
+          .header('cache-control', 'private, no-store')
+          .send(stream as never);
+      } catch (err) {
+        if (err instanceof StorageError) {
+          request.log.error({ err }, 'object storage failure');
+          throw err.kind === 'NOT_FOUND'
+            ? ApiError.internal('Stored object is missing')
+            : ApiError.upstream('Object storage is unavailable');
+        }
+        throw err;
+      }
     },
   );
 

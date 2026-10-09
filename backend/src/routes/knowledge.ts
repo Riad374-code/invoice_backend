@@ -127,6 +127,29 @@ export default async function knowledgeRoutes(app: FastifyInstance) {
   );
 
   typed.get(
+    '/api/v1/news/sources',
+    {
+      schema: {
+        tags: ['news'],
+        summary:
+          'Xəbər filtri üçün aktiv mənbələr (konfiqurasiyasız, platforma icazəsi tələb olunmur)',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: z.array(z.object({ id: z.uuid(), name: z.string(), url: z.string() })),
+          ...errorResponses(401, 403),
+        },
+      },
+      config: { permission: PERMISSIONS.NEWS_READ },
+    },
+    async () =>
+      (await ing().listSources({ enabledOnly: true })).map((s) => ({
+        id: s.id,
+        name: s.name,
+        url: s.url,
+      })),
+  );
+
+  typed.get(
     '/api/v1/news/:id',
     {
       schema: {

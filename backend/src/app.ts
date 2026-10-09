@@ -42,13 +42,17 @@ import type { Embedder, Reranker } from './rag/clients.js';
 import type { ObjectStorage } from './storage/index.js';
 
 /** Log arqumentlərində PII maskalanır; Error obyektləri (stack trace) toxunulmaz qalır. */
+// Fastify-ın `req`/`res`/`err` obyektləri canlı sokets/parser qrafıdır: onları pino serializer-ləri sadələşdirir.
+const RAW_LOG_KEYS = new Set(['req', 'res', 'request', 'reply', 'err', 'error']);
 function maskLogArg(arg: unknown): unknown {
   if (typeof arg === 'string') return maskText(arg);
   if (arg === null || typeof arg !== 'object' || arg instanceof Error) return arg;
   return Object.fromEntries(
     Object.entries(arg).map(([k, v]) => [
       k,
-      v instanceof Error ? v : (maskJsonValue({ [k]: v }) as Record<string, unknown>)[k],
+      RAW_LOG_KEYS.has(k) || v instanceof Error
+        ? v
+        : (maskJsonValue({ [k]: v }) as Record<string, unknown>)[k],
     ]),
   );
 }

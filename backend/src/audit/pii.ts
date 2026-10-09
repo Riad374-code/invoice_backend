@@ -20,22 +20,44 @@ export function maskText(input: string): string {
 
 const SECRET_KEY = /password|secret|token/i;
 
-/** JSON-u rekursiv maskalayır; parol/secret/token açarları tam gizlədilir. */
-export function maskJsonValue(value: unknown): unknown {
+const MAX_DEPTH = 12;
+const isPlain = (v: object): boolean => {
+  const proto = Object.getPrototypeOf(v) as unknown;
+  return proto === Object.prototype || proto === null;
+};
+
+/**
+ * JSON-u rekursiv maskalayır; parol/secret/token açarları tam gizlədilir.
+ * Dövri istinadlar və dərinlik məhdudlaşdırılıb (Fastify `req.raw.socket…` kimi obyekt qrafları loga düşə bilər);
+ * yalnız sadə obyekt/massivlər gəzilir, Date/Buffer/sinif nümunələri olduğu kimi qalır.
+ */
+export function maskJsonValue(
+  value: unknown,
+  seen: WeakSet<object> = new WeakSet(),
+  depth = 0,
+): unknown {
   if (typeof value === 'string') return maskText(value);
-  if (Array.isArray(value)) return value.map(maskJsonValue);
-  if (value !== null && typeof value === 'object') {
-    const out: Record<string, unknown> = {};
-    for (const [key, v] of Object.entries(value as Record<string, unknown>)) {
-      if (SECRET_KEY.test(key)) {
-        out[key] = '[REDACTED]';
-      } else if (key.toLowerCase() === 'fin' && typeof v === 'string') {
-        out[key] = v.length === 7 ? `${v.slice(0, 2)}***${v.slice(5)}` : '[MASKED_FIN]';
-      } else {
-        out[key] = maskJsonValue(v);
-      }
-    }
+  if (value === null || typeof value !== 'object') return value;
+  if (seen.has(value)) return '[Circular]';
+  if (depth >= MAX_DEPTH) return '[MaxDepth]';
+  if (Array.isArray(value)) {
+    seen.add(value);
+    const out = value.map((v) => maskJsonValue(v, seen, depth + 1));
+    seen.delete(value);
     return out;
   }
-  return value;
+  if (!isPlain(value)) return value;
+  seen.add(value);
+  const out: Record<string, unknown> = {};
+  for (const [key, v] of Object.entries(value as Record<string, unknown>)) {
+    if (SECRET_KEY.test(key)) {
+      out[key] = '[REDACTED]';
+    } else if (key.toLowerCase() === 'fin' && typeof v === 'string') {
+      out[key] = v.length === 7 ? `${v.slice(0, 2)}***${v.slice(5)}` : '[MASKED_FIN]';
+    } else {
+      out[key] = maskJsonValue(v, seen, depth + 1);
+    }
+  }
+  seen.delete(value);
+  return out;
 }

@@ -79,10 +79,16 @@ const boolFromEnv = (def: boolean) =>
 
 const schema = z.object({
   APP_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  BIND_ADDR: z.string().default('0.0.0.0:8080'),
+  BIND_ADDR: z.string().optional(),
+  /** Railway/Heroku tipli platformalar portu `PORT` ilə verir; BIND_ADDR verilməyibsə istifadə olunur. */
+  PORT: z
+    .string()
+    .regex(/^\d{1,5}$/, 'PORT must be a number')
+    .optional(),
+  RAILWAY_ENVIRONMENT: optionalString,
   PUBLIC_BASE_URL: z.string().default('http://localhost:8080'),
   CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:3000'),
-  TRUST_PROXY: boolFromEnv(false),
+  TRUST_PROXY: z.string().optional(),
   AUTO_MIGRATE: z.string().optional(),
   DATABASE_URL: optionalString,
   JWT_SECRET: z.string({ error: 'JWT_SECRET is required' }),
@@ -152,10 +158,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   }
   if (e.JWT_SECRET === e.CSRF_SECRET) issues.push('JWT_SECRET and CSRF_SECRET must differ');
 
-  const bind = /^(.*):(\d{1,5})$/.exec(e.BIND_ADDR);
+  const bindAddr = e.BIND_ADDR ?? (e.PORT ? `0.0.0.0:${e.PORT}` : '0.0.0.0:8080');
+  const bind = /^(.*):(\d{1,5})$/.exec(bindAddr);
   const port = bind ? Number(bind[2]) : NaN;
   if (!bind || port < 0 || port > 65535) {
-    issues.push(`BIND_ADDR must look like host:port (got "${e.BIND_ADDR}")`);
+    issues.push(`BIND_ADDR must look like host:port (got "${bindAddr}")`);
   }
 
   const cors = e.CORS_ALLOWED_ORIGINS.split(',')
@@ -206,7 +213,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     port,
     publicBaseUrl: e.PUBLIC_BASE_URL,
     corsAllowedOrigins: cors,
-    trustProxy: e.TRUST_PROXY,
+    // Railway-də trafik həmişə onların edge proxy-sindən gəlir; başqa yerdə açıq-aşkar TRUST_PROXY=true lazımdır
+    trustProxy:
+      e.TRUST_PROXY === undefined || e.TRUST_PROXY === ''
+        ? e.RAILWAY_ENVIRONMENT !== undefined
+        : ['1', 'true', 'yes'].includes(e.TRUST_PROXY.toLowerCase()),
     // dev/test-də avtomatik; production-da migrasiya ayrıca addım kimi (`npm run migrate`) işləyir
     autoMigrate:
       e.AUTO_MIGRATE === undefined || e.AUTO_MIGRATE === ''

@@ -71,6 +71,26 @@ export default async function approvalRoutes(app: FastifyInstance) {
     },
   );
 
+  typed.get(
+    '/api/v1/approvals/:id',
+    {
+      schema: {
+        tags: ['approvals'],
+        security: [{ bearerAuth: [] }],
+        params: z.object({ id: z.uuid() }),
+        response: { 200: ApprovalSchema, ...errorResponses(401, 403, 404, 422) },
+      },
+      config: { permission: PERMISSIONS.APPROVALS_READ },
+    },
+    async (request) => {
+      const auth = requireAuth(request);
+      const a = await app.ctx.repos.approvals.findById(request.params.id);
+      // başqa şirkətin sorğusu "mövcud deyil" kimi görünür
+      if (!a || a.companyId !== auth.companyId) throw ApiError.notFound('Approval not found');
+      return toResponse(a);
+    },
+  );
+
   typed.post(
     '/api/v1/approvals/:id/decide',
     {

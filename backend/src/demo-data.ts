@@ -144,6 +144,12 @@ export async function seedDemoData(
     deletedAt: null,
   });
 
+  // Platforma operatoru hələ yoxdursa, demo şirkət admin konsolunu (mənbələr/dərəcələr/modellər) göstərə bilsin deyə platforma olur.
+  await db.query(
+    `UPDATE companies SET is_platform = TRUE WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM companies WHERE is_platform)`,
+    [companyId],
+  );
+
   const users: Record<string, string> = {};
   for (const role of ['admin', 'accountant', 'approver', 'viewer']) {
     const u = await repos.users.create({
