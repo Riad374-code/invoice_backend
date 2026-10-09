@@ -182,12 +182,20 @@ export class HttpRagOcr implements RagOcrClient {
 /** OCR-ı sidecar-a yönləndirir; model-serving varsa qalan metodlar ondan qalır. */
 export function withRagOcr(base: ModelServing | undefined, rag: RagOcrClient): ModelServing {
   const unavailable = (what: string) => () =>
-    Promise.reject(new UpstreamError(`${what} needs MODEL_SERVING_BASE_URL`));
+    Promise.reject(
+      new UpstreamError(
+        `${what} needs MODEL_SERVING_BASE_URL pointing to a compatible model server; ` +
+          'the RAG/OCR sidecar only provides OCR and search (see SETUP.md)',
+      ),
+    );
   return {
-    extractInvoice: unavailable('invoice extraction'),
-    classifyNews: unavailable('news classification'),
-    classifyAccount: unavailable('account classification'),
-    ...(base ?? {}),
+    // Class methods live on the prototype: spreading a client drops them and its `this` binding.
+    extractInvoice: base ? (text) => base.extractInvoice(text) : unavailable('invoice extraction'),
+    classifyNews: base ? (text) => base.classifyNews(text) : unavailable('news classification'),
+    classifyAccount: base
+      ? (req) => base.classifyAccount(req)
+      : unavailable('account classification'),
+    ...(base?.listModels ? { listModels: base.listModels.bind(base) } : {}),
     ocr: (file, mime) => rag.ocr(file, mime),
-  } as ModelServing;
+  };
 }

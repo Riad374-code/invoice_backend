@@ -65,7 +65,9 @@ export async function createInfra(config: AppConfig): Promise<Infra> {
     infra.llm = new HttpLlmClient({ ...http, model: config.models.chat });
   } else {
     warnings.push(
-      'MODEL_SERVING_BASE_URL is not set — embeddings/rerank disabled; search falls back to full-text only.',
+      'MODEL_SERVING_BASE_URL is not set — assistant chat, invoice extraction, account/news classification, ' +
+        'embeddings and reranking are disabled. Internal search uses full-text only. ' +
+        'RAG_OCR_BASE_URL + RAG_OCR_TOKEN enable separate OCR/Tax Code/receipt tools, not a model server. See SETUP.md.',
     );
   }
   if (config.ragOcr) {

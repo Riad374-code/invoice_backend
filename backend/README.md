@@ -6,7 +6,7 @@ Spec: [`../BACKEND.md`](../BACKEND.md). Step plan and status: [`../backend-steps
 ## Run without Docker (development)
 
 ```bash
-cp .env.example .env        # set JWT_SECRET / CSRF_SECRET (>= 32 chars, different) ; clear DATABASE_URL
+cp .env.example .env        # set JWT_SECRET / CSRF_SECRET (>= 32 chars, different)
 npm ci
 npm run dev                 # in-memory Postgres (PGlite) + in-memory object storage; data is lost on exit
 ```
@@ -17,9 +17,13 @@ Health: `GET http://localhost:8080/admin/health` · OpenAPI: `GET /api/v1/openap
 ## Run with Docker
 
 ```bash
-JWT_SECRET=... CSRF_SECRET=... docker compose up --build      # api + postgres + minio (+ model-serving stub)
+JWT_SECRET=... CSRF_SECRET=... docker compose up --build      # api + postgres + minio
 docker compose --profile av up                                  # also ClamAV (CLAMAV_HOST=clamav)
 ```
+
+AI is optional. See [the integration guide](../SETUP.md#3-ai-service-connections) for the
+separate RAG/OCR sidecar and model-server configuration. The echo stub available through
+`--profile model-stub` is only a connectivity test; it cannot serve AI requests.
 
 ## Quality gates (CI)
 
