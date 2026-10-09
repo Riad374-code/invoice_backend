@@ -7,31 +7,91 @@ on:
     branches: [main, master]
 
 jobs:
-  check-format-test:
-    name: Check, Lint & Test
+  check-lint-test:
+    name: Typecheck, Lint & Test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Rust stable toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          components: clippy, rustfmt
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Cache Cargo dependencies
-        uses: Swatinem/rust-cache@v2
+      - name: Install dependencies (lockfile is authoritative)
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Tests (unit, integration on real Postgres via PGlite, golden)
+        run: npm test
+
+      - name: OpenAPI schema is generated and committed in sync
+        run: |
+          npm run openapi
+          git diff --exit-code openapi.json
+
+      - name: Build
+        run: npm run build
+
+  docker-postgres:
+    name: Integration against real PostgreSQL 16 + pgvector
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: lexaudit
+          POSTGRES_PASSWORD: lexaudit_ci
+          POSTGRES_DB: lexaudit
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U lexaudit"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          workspaces: backend
-
-      - name: Verify Cargo formatting
-        working-directory: backend
-        run: cargo fmt --all -- --check
-
-      - name: Clippy checks (warnings as errors)
-        working-directory: backend
-        run: cargo clippy --workspace --all-targets -- -D warnings
-
-      - name: Run automated test suite
-        working-directory: backend
-        run: cargo test --workspace --verbose
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Start MinIO (S3-compatible) for the storage integration test
+        run: |
+          docker run -d --name minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
+            minio/minio server /data
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:9000/minio/health/ready && exit 0
+            sleep 1
+          done
+          echo "MinIO did not become ready" >&2; exit 1
+      - name: Apply migrations to a clean database
+        env:
+          DATABASE_URL: postgres://lexaudit:lexaudit_ci@localhost:5432/lexaudit
+        run: npm run migrate
+      - name: Migrations are idempotent (second run applies nothing)
+        env:
+          DATABASE_URL: postgres://lexaudit:lexaudit_ci@localhost:5432/lexaudit
+        run: npm run migrate
+      - name: Real-service tests (S3 against MinIO, parallel job claiming against Postgres)
+        env:
+          TEST_DATABASE_URL: postgres://lexaudit:lexaudit_ci@localhost:5432/lexaudit
+          TEST_S3_ENDPOINT: http://localhost:9000
+        run: npx vitest run tests/integration/real-services.test.ts

@@ -25,74 +25,74 @@ Backend **LLM-in hesabladığı rəqəmə və ya verdiyi icazəyə heç vaxt eti
 
 | Sahə | Seçim |
 |---|---|
-| Dil | **Rust** (stable) |
-| Web framework | **Axum** + **tower** middleware |
-| Async runtime | **Tokio** |
+| Dil | **TypeScript** (strict, ESM) — **Node.js 24 LTS** |
+| Web framework | **Fastify 5** (plugin/hook modeli, JSON-schema/zod əsaslı validasiya) |
+| Runtime | Node.js (async I/O); CPU-ağır işlər (OCR, embedding) model-serving-də |
 | DB | **PostgreSQL 16** + **pgvector** + `pg_trgm` + `unaccent` (Azərbaycan və rus dili mətn axtarışı; `ə, ı, ğ, ş, ç, ö, ü` normallaşdırması) |
-| DB layer | **SQLx** (compile-time yoxlanan sorğular), migrations |
-| Pul | **rust_decimal** — `f64` qadağandır |
-| Validasiya | **validator** / **garde** |
-| Auth | **argon2** (şifrə), **jsonwebtoken** (access token 15 dəq), refresh token DB-də (hash), brauzerə `HttpOnly; Secure; SameSite=Strict` cookie kimi verilir + CSRF token |
-| OpenAPI | **utoipa** → frontend tip generasiyası |
-| Fon işləri | **apalis** və ya Postgres əsaslı növbə (`SKIP LOCKED`) + cron |
-| Fayl anbarı | **S3-uyğun** (MinIO on-prem) — DB-də yalnız `storage_key` |
-| Excel | **calamine** (oxumaq), **rust_xlsxwriter** (yazmaq) |
-| XML (e-qaimə, 1C export) | **quick-xml** |
+| DB layer | **node-postgres (`pg`)** + əl ilə yazılmış parametrli SQL repository-lər; SQL migrations (`migrations/*.sql`, checksum-lu, yalnız irəli) |
+| Pul | **decimal.js** — `number`/float ilə pul hesablaması qadağandır; məbləğlər API-də **string** |
+| Validasiya | **zod** (`fastify-type-provider-zod`) — eyni sxem həm validasiya, həm tip, həm OpenAPI |
+| Auth | **argon2id** (şifrə), **jose** (JWT access token 15 dəq), refresh token DB-də (SHA-256 hash), brauzerə `HttpOnly; Secure; SameSite=Strict` cookie kimi verilir + CSRF token (HMAC, sessiyaya bağlı) |
+| OpenAPI | **@fastify/swagger** + zod → `openapi.json` → frontend tip generasiyası |
+| Fon işləri | Postgres əsaslı növbə (`FOR UPDATE SKIP LOCKED`) + cron (`croner`) |
+| Fayl anbarı | **S3-uyğun** (MinIO on-prem, `@aws-sdk/client-s3`) — DB-də yalnız `storage_key` |
+| Excel | **exceljs** (oxumaq və yazmaq) |
+| XML (e-qaimə, 1C export) | **fast-xml-parser** |
 | 1C inteqrasiyası | Excel/XML export-import parser-ləri (versiyalı şablonlar) |
-| HTML scraping | **reqwest** + **scraper** |
-| Logging/tracing | **tracing**, OpenTelemetry, Prometheus metrics |
-| Test | `cargo test`, **testcontainers** (real Postgres), **insta** (snapshot) |
+| HTML scraping | Node `fetch` + **cheerio** |
+| Logging/tracing | **pino** (Fastify), OpenTelemetry (OTLP), Prometheus (`prom-client`) |
+| Test | **vitest**; real Postgres: CI-da servis konteyner, lokal/CI-da **PGlite** (proses daxili Postgres 16 + pgvector + pg_trgm + unaccent); **fast-check** (property-based); vitest snapshot |
 | Deploy | Docker Compose (dev), Kubernetes/on-prem (prod) — məlumat Azərbaycan daxilində saxlanılır ("Fərdi məlumatlar haqqında" Qanun) |
 
 ---
 
-## 3. Qovluq strukturu (Cargo workspace)
+## 3. Qovluq strukturu (npm paketi, modul sərhədləri `src/` altında)
 
 ```
 backend/
-├── BACKEND.md
-├── Cargo.toml                    # workspace
-├── Cargo.lock                    # COMMIT olunur (audit A-19)
+├── package.json / package-lock.json   # lockfile COMMIT olunur (audit A-19)
+├── tsconfig.json  eslint.config.js  vitest.config.ts
 ├── .env.example
-├── docker-compose.yml            # postgres+pgvector, minio, model-serving (dev)
-├── migrations/                   # SQLx migrations (0001_init.sql, ...)
-├── crates/
-│   ├── api/                      # Axum server: router, handlers, middleware, OpenAPI
-│   │   └── src/
-│   │       ├── main.rs
-│   │       ├── config.rs         # typed config, eksik secret → start olmur
-│   │       ├── router.rs
-│   │       ├── middleware/       # auth, request_id, rate_limit, idempotency, cors
-│   │       ├── error.rs          # ApiError → {error:{code,message,requestId}}
-│   │       └── routes/           # auth, invoices, vat, ledger, excel, recon, news,
-│   │                             # legislation, files, assistant, approvals, audit, admin
-│   ├── domain/                   # biznes tipləri, enum-lar, state machine-lər (IO yoxdur)
-│   ├── accounting/               # DETERMINISTIK mühərrik (IO yoxdur, 100% test)
-│   │   └── src/
-│   │       ├── vat.rs            # ƏDV hesablanması (dərəcə, azadolma, 0%)
-│   │       ├── vat_deposit.rs    # ƏDV depozit hesabı ↔ uçot uzlaşdırması
-│   │       ├── withholding.rs    # ödəmə mənbəyində vergi
-│   │       ├── payroll.rs        # (Faza 2) gəlir vergisi, DSMF, işsizlik, icbari tibbi sığorta
-│   │       ├── rounding.rs       # yuvarlaqlaşdırma qaydaları
-│   │       ├── fx.rs             # valyuta çevirmə (CBAR rəsmi məzənnəsi ilə)
-│   │       ├── journal.rs        # debet = kredit, hesab kodu validasiyası
-│   │       ├── tax_id.rs         # VÖEN (10 rəqəm), FİN (7 simvol), AZ IBAN (28 simvol) format yoxlaması
-│   │       └── rates.rs          # tarixə görə dərəcə seçimi
-│   ├── db/                       # repository-lər (SQLx)
-│   ├── storage/                  # S3 adapter
-│   ├── documents/                # PDF/şəkil/XML/Excel parse, OCR çağırışı
-│   ├── ingestion/                # xəbər + qanun scraper-ləri, dedupe, versiyalama
-│   ├── rag/                      # chunking, embedding client, hybrid search, rerank, citation
-│   ├── llm/                      # model-serving client (OpenAI-uyğun API), prompt şablonları
-│   ├── agent/                    # orkestrator, tool registry, tool gateway, approvals
-│   ├── jobs/                     # fon işləri və cron
-│   └── audit/                    # dəyişməz audit log yazıcı
+├── Dockerfile  docker-compose.yml     # api + postgres+pgvector + minio + model-serving (dev)
+├── openapi.json                       # generasiya olunur (`npm run openapi`), CI-da sinxron yoxlanır
+├── migrations/                        # SQL migrations (0001_init.sql, 0002_seed_rbac.sql, ...)
+├── src/
+│   ├── main.ts                        # giriş nöqtəsi: config → DB → migrate → server
+│   ├── app.ts                         # buildApp(): plugin-lər və route-ların yığılması (testlər də istifadə edir)
+│   ├── config.ts                      # typed config, eksik secret → start olmur
+│   ├── error.ts                       # ApiError → {error:{code,message,requestId}}
+│   ├── context.ts                     # AppContext (DI): config, db, repos, audit, rateLimiter
+│   ├── plugins/                       # auth (RequireAuth+permission), request-id, rate-limit,
+│   │                                  # idempotency, error-handler, audit-guard, metrics
+│   ├── routes/                        # auth, invoices, vat, ledger, excel, recon, news,
+│   │                                  # legislation, files, assistant, approvals, audit, admin
+│   ├── domain/                        # biznes tipləri, enum-lar, state machine-lər (IO yoxdur)
+│   ├── accounting/                    # DETERMINISTIK mühərrik (IO yoxdur, 100% test)
+│   │   ├── vat.ts                     # ƏDV hesablanması (dərəcə, azadolma, 0%)
+│   │   ├── vat-deposit.ts             # ƏDV depozit hesabı ↔ uçot uzlaşdırması
+│   │   ├── withholding.ts             # ödəmə mənbəyində vergi
+│   │   ├── payroll.ts                 # (Faza 2) gəlir vergisi, DSMF, işsizlik, icbari tibbi sığorta
+│   │   ├── rounding.ts                # yuvarlaqlaşdırma qaydaları
+│   │   ├── fx.ts                      # valyuta çevirmə (CBAR rəsmi məzənnəsi ilə)
+│   │   ├── journal.ts                 # debet = kredit, hesab kodu validasiyası
+│   │   ├── tax-id.ts                  # VÖEN (10 rəqəm), FİN (7 simvol), AZ IBAN (28 simvol) format yoxlaması
+│   │   └── rates.ts                   # tarixə görə dərəcə seçimi
+│   ├── db/                            # Db interfeysi (pg Pool / PGlite), migrate, repos/ (SQL)
+│   ├── storage/                       # S3 adapter
+│   ├── documents/                     # PDF/şəkil/XML/Excel parse, OCR çağırışı
+│   ├── ingestion/                     # xəbər + qanun scraper-ləri, dedupe, versiyalama
+│   ├── rag/                           # chunking, embedding client, hybrid search, rerank, citation
+│   ├── llm/                           # model-serving client (OpenAI-uyğun API), prompt şablonları
+│   ├── agent/                         # orkestrator, tool registry, tool gateway, approvals
+│   ├── jobs/                          # fon işləri və cron
+│   └── audit/                         # dəyişməz audit log yazıcı + PII maskalama
 └── tests/
-    ├── integration/
-    └── golden/                   # ƏDV/qaimə qızıl test faylları
+    ├── helpers/                       # createTestEnv(): PGlite + migrate + seed + app
+    ├── integration/                   # DB (migration, immutability, CHECK) və API testləri
+    └── golden/                        # ƏDV/qaimə qızıl test faylları
 ```
 
-**Qayda:** `accounting` və `domain` crate-ləri heç bir IO-dan (DB, HTTP) asılı deyil — təmiz funksiyalar, tam test olunur.
+**Qayda:** `accounting` və `domain` modulları heç bir IO-dan (DB, HTTP) asılı deyil — təmiz funksiyalar, tam test olunur.
 
 ---
 
@@ -191,7 +191,7 @@ Kodlar: `UNAUTHENTICATED`, `FORBIDDEN`, `NOT_FOUND`, `VALIDATION_FAILED`, `CONFL
 ## 6. Mühasibat mühərriki (deterministik)
 
 ### 6.1 Prinsiplər
-- Bütün hesablamalar `rust_decimal::Decimal` ilə.
+- Bütün hesablamalar `decimal.js` `Decimal` ilə (heç vaxt `number`).
 - Dərəcələr kodda **sabit yazılmır**: `tax_rates` cədvəlindən **əməliyyat tarixinə görə** seçilir.
 - Yuvarlaqlaşdırma qaydası yurisdiksiyaya görə konfiqurasiya olunur (sətir səviyyəsində və ya cəm səviyyəsində).
 - Hər nəticə `explanation` qaytarır: hansı dərəcə, hansı qanun mənbəyi, hansı addımlar.
@@ -211,7 +211,7 @@ invoice::check(invoice) -> Vec<InvoiceIssue>       // cəm, dərəcə, tarix, V�
 
 ### 6.3 Test
 - `tests/golden/` — yüzlərlə real formatlı (anonimləşdirilmiş) qaimə + gözlənilən nəticə
-- Property-based testlər (`proptest`): `gross == net + vat`, jurnal balansı həmişə 0
+- Property-based testlər (`fast-check`): `gross == net + vat`, jurnal balansı həmişə 0
 - Dərəcə dəyişikliyi sərhədləri: dəyişiklik tarixindən bir gün əvvəl/sonra
 
 ---
@@ -225,7 +225,7 @@ upload → S3 → file_versions (sha256 dedupe)
            ├─ 1C export (Excel/XML) → şablon parser → import_jobs
            ├─ PDF (mətnli)  → mətn + layout çıxarışı → model: extract_invoice
            ├─ PDF/şəkil (skan) → OCR (model-serving) → model: extract_invoice
-           └─ XLSX/CSV → calamine → profil
+           └─ XLSX/CSV → exceljs → profil
       → invoices / invoice_lines (status = extracted, confidence)
       → accounting::invoice::check → invoice_issues
       → model: suggest_accounts → invoice_lines.account_suggestion
@@ -330,9 +330,9 @@ Qadağan: ixtiyari SQL, shell, fayl sistemi yolları, istifadəçi idarəetməsi
 | Qayda | Audit |
 |---|---|
 | Şifrə Argon2id, login rate limit, 2FA (istəyə bağlı) | A-01 |
-| Hər handler-də `RequireAuth` + `RequirePermission` extractor | A-02 |
+| Hər route-da `config.public` / `authOnly` / `permission` elanı məcburidir (elan yoxdursa server boot olmur) — `RequireAuth` + `RequirePermission` | A-02 |
 | `approver_id <> requester_id` (DB CHECK + kod) | A-03 |
-| Status = Rust enum + state machine; etibarsız keçid → `409 CONFLICT` | A-04 |
+| Status = TypeScript union/enum + state machine; etibarsız keçid → `409 CONFLICT` | A-04 |
 | Tapılmayan resurs → `404`; fallback yoxdur | A-05 |
 | Token müddəti dinamik, refresh rotation | A-07 |
 | Lock/DB xətası → `5xx`, heç vaxt saxta uğur | A-13 |
@@ -384,7 +384,7 @@ Hər AI nəticəsi ilə `model_version` saxlanılır (izlənə bilmə və rollba
 |---|---|
 | Unit | `accounting`, `domain` — 100% əhatə hədəfi |
 | Golden | Qaimə/ƏDV qızıl faylları |
-| Integration | testcontainers Postgres: repository-lər, RLS, migrations |
+| Integration | real Postgres (PGlite / CI servis konteyneri): repository-lər, RLS, migrations |
 | API | Hər endpoint: 200 / 401 / 403 / 404 / 409 / 422 halları |
 | Agent | Mock LLM ilə: icazəsiz alət rədd olunur, write → approval, prompt injection testləri |
 | Load | k6: qaimə yükləmə və chat |
@@ -399,7 +399,7 @@ Hər AI nəticəsi ilə `model_version` saxlanılır (izlənə bilmə və rollba
 | B2 | Migrations: identity, audit, approvals | |
 | B3 | Auth + RBAC + audit middleware | Login, refresh, icazə |
 | B4 | Files + S3 + extraction job skeleti | |
-| B5 | `accounting` crate + golden testlər | ƏDV, depozit hesabı, jurnal |
+| B5 | `accounting` modulu + golden testlər | ƏDV, depozit hesabı, jurnal |
 | B6 | Invoices: XML parse, validasiya, issues | |
 | B7 | Sources + news + legislation ingestion, versiyalama | |
 | B8 | Chunks + embedding + hybrid search + rerank | RAG |
@@ -415,9 +415,9 @@ Hər AI nəticəsi ilə `model_version` saxlanılır (izlənə bilmə və rollba
 
 ## 16. Qəbul meyarları
 
-- `cargo clippy -D warnings`, `cargo test`, integration testlər CI-da yaşıl
+- `tsc --noEmit`, `eslint`, `prettier --check`, `vitest` (unit + integration) CI-da yaşıl
 - OpenAPI sxemi generasiya olunur və frontend tipləri onunla sinxrondur
 - Heç bir endpoint auth/icazə yoxlamasız deyil (avtomatik test ilə yoxlanır)
-- `f64` pul hesablamasında istifadə olunmur (clippy lint)
+- `number`/float pul hesablamasında istifadə olunmur (`Decimal`; ESLint qaydası + testlər)
 - Bütün AI çıxışları `model_version` ilə saxlanılır
 - Bütün yazma əməliyyatları `audit_events`-də görünür

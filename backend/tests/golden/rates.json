@@ -1,0 +1,60 @@
+{
+  "description": "TEST FIXTURE rate table (not real legislation).",
+  "rates": [
+    {
+      "id": "vat-std-old",
+      "taxType": "VAT",
+      "code": "STANDARD",
+      "ratePercent": "18",
+      "validFrom": "2001-01-01",
+      "validTo": "2030-06-30",
+      "legalSourceId": "src-tax-code",
+      "status": "active",
+      "treatment": null
+    },
+    {
+      "id": "vat-std-new",
+      "taxType": "VAT",
+      "code": "STANDARD",
+      "ratePercent": "20",
+      "validFrom": "2030-07-01",
+      "validTo": null,
+      "legalSourceId": "src-amendment",
+      "status": "active",
+      "treatment": null
+    },
+    {
+      "id": "vat-reduced",
+      "taxType": "VAT",
+      "code": "REDUCED",
+      "ratePercent": "8.5",
+      "validFrom": "2001-01-01",
+      "validTo": null,
+      "legalSourceId": null,
+      "status": "active",
+      "treatment": null
+    },
+    {
+      "id": "vat-zero",
+      "taxType": "VAT",
+      "code": "ZERO",
+      "ratePercent": "0",
+      "validFrom": "2001-01-01",
+      "validTo": null,
+      "legalSourceId": null,
+      "status": "active",
+      "treatment": "zero_rated"
+    },
+    {
+      "id": "vat-exempt",
+      "taxType": "VAT",
+      "code": "EXEMPT",
+      "ratePercent": "0",
+      "validFrom": "2001-01-01",
+      "validTo": null,
+      "legalSourceId": null,
+      "status": "active",
+      "treatment": "exempt"
+    }
+  ]
+}

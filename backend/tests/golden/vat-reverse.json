@@ -1,0 +1,5445 @@
+{
+  "description": "vat.reverse — expected values from the independent BigInt reference.",
+  "cases": [
+    {
+      "id": "rev-001",
+      "input": {
+        "gross": "100.00",
+        "rateCode": "STANDARD",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "100.00",
+        "vat": "15.25",
+        "net": "84.75"
+      }
+    },
+    {
+      "id": "rev-002",
+      "input": {
+        "gross": "0.25",
+        "rateCode": "STANDARD",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "0.25",
+        "vat": "0.04",
+        "net": "0.21"
+      }
+    },
+    {
+      "id": "rev-003",
+      "input": {
+        "gross": "0.25",
+        "rateCode": "STANDARD",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "0.25",
+        "vat": "0.04",
+        "net": "0.21"
+      }
+    },
+    {
+      "id": "rev-004",
+      "input": {
+        "gross": "33.33",
+        "rateCode": "STANDARD",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "33.33",
+        "vat": "5.08",
+        "net": "28.25"
+      }
+    },
+    {
+      "id": "rev-005",
+      "input": {
+        "gross": "100.00",
+        "rateCode": "STANDARD",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "100.00",
+        "vat": "15.25",
+        "net": "84.75"
+      }
+    },
+    {
+      "id": "rev-006",
+      "input": {
+        "gross": "100.00",
+        "rateCode": "STANDARD",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "100.00",
+        "vat": "16.67",
+        "net": "83.33"
+      }
+    },
+    {
+      "id": "rev-007",
+      "input": {
+        "gross": "0.01",
+        "rateCode": "STANDARD",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "0.01",
+        "vat": "0.01",
+        "net": "0.00"
+      }
+    },
+    {
+      "id": "rev-008",
+      "input": {
+        "gross": "99999999.99",
+        "rateCode": "STANDARD",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "99999999.99",
+        "vat": "15254237.29",
+        "net": "84745762.70"
+      }
+    },
+    {
+      "id": "rev-009",
+      "input": {
+        "gross": "-0.25",
+        "rateCode": "STANDARD",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "-0.25",
+        "vat": "-0.04",
+        "net": "-0.21"
+      }
+    },
+    {
+      "id": "rev-010",
+      "input": {
+        "gross": "12.34",
+        "rateCode": "REDUCED",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "12.34",
+        "vat": "0.97",
+        "net": "11.37"
+      }
+    },
+    {
+      "id": "rev-011",
+      "input": {
+        "gross": "500.00",
+        "rateCode": "ZERO",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "500.00",
+        "vat": "0.00",
+        "net": "500.00"
+      }
+    },
+    {
+      "id": "rev-012",
+      "input": {
+        "gross": "500.00",
+        "rateCode": "EXEMPT",
+        "date": "2030-05-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "500.00",
+        "vat": "0.00",
+        "net": "500.00"
+      }
+    },
+    {
+      "id": "rev-013",
+      "input": {
+        "gross": "637891.96",
+        "rateCode": "STANDARD",
+        "date": "2030-12-26",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "637891.96",
+        "vat": "106315.33",
+        "net": "531576.63"
+      }
+    },
+    {
+      "id": "rev-014",
+      "input": {
+        "gross": "737459.94",
+        "rateCode": "STANDARD",
+        "date": "2028-03-24",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "737459.94",
+        "vat": "112493.89",
+        "net": "624966.05"
+      }
+    },
+    {
+      "id": "rev-015",
+      "input": {
+        "gross": "2050608.49",
+        "rateCode": "STANDARD",
+        "date": "2029-06-12",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "2050608.49",
+        "vat": "312804.68",
+        "net": "1737803.81"
+      }
+    },
+    {
+      "id": "rev-016",
+      "input": {
+        "gross": "2362738.93",
+        "rateCode": "ZERO",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "2362738.93",
+        "vat": "0.00",
+        "net": "2362738.93"
+      }
+    },
+    {
+      "id": "rev-017",
+      "input": {
+        "gross": "2643492.84",
+        "rateCode": "ZERO",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "2643492.84",
+        "vat": "0.00",
+        "net": "2643492.84"
+      }
+    },
+    {
+      "id": "rev-018",
+      "input": {
+        "gross": "6717290.51",
+        "rateCode": "REDUCED",
+        "date": "2031-06-21",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "6717290.51",
+        "vat": "526239.35",
+        "net": "6191051.16"
+      }
+    },
+    {
+      "id": "rev-019",
+      "input": {
+        "gross": "4375383.43",
+        "rateCode": "REDUCED",
+        "date": "2028-03-27",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "4375383.43",
+        "vat": "342771.97",
+        "net": "4032611.46"
+      }
+    },
+    {
+      "id": "rev-020",
+      "input": {
+        "gross": "4418935.26",
+        "rateCode": "REDUCED",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "4418935.26",
+        "vat": "346183.87",
+        "net": "4072751.39"
+      }
+    },
+    {
+      "id": "rev-021",
+      "input": {
+        "gross": "575591.68",
+        "rateCode": "REDUCED",
+        "date": "2030-10-23",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "575591.68",
+        "vat": "45092.44",
+        "net": "530499.24"
+      }
+    },
+    {
+      "id": "rev-022",
+      "input": {
+        "gross": "1102311.74",
+        "rateCode": "REDUCED",
+        "date": "2029-04-17",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1102311.74",
+        "vat": "86356.22",
+        "net": "1015955.52"
+      }
+    },
+    {
+      "id": "rev-023",
+      "input": {
+        "gross": "1579141.15",
+        "rateCode": "STANDARD",
+        "date": "2030-08-11",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "1579141.15",
+        "vat": "263190.19",
+        "net": "1315950.96"
+      }
+    },
+    {
+      "id": "rev-024",
+      "input": {
+        "gross": "987518.47",
+        "rateCode": "ZERO",
+        "date": "2031-06-28",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "987518.47",
+        "vat": "0.00",
+        "net": "987518.47"
+      }
+    },
+    {
+      "id": "rev-025",
+      "input": {
+        "gross": "585840.63",
+        "rateCode": "REDUCED",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "585840.63",
+        "vat": "45895.35",
+        "net": "539945.28"
+      }
+    },
+    {
+      "id": "rev-026",
+      "input": {
+        "gross": "489634.91",
+        "rateCode": "STANDARD",
+        "date": "2029-07-27",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "489634.91",
+        "vat": "74690.07",
+        "net": "414944.84"
+      }
+    },
+    {
+      "id": "rev-027",
+      "input": {
+        "gross": "1617225.88",
+        "rateCode": "REDUCED",
+        "date": "2029-09-07",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1617225.88",
+        "vat": "126695.12",
+        "net": "1490530.76"
+      }
+    },
+    {
+      "id": "rev-028",
+      "input": {
+        "gross": "11743285.80",
+        "rateCode": "EXEMPT",
+        "date": "2031-02-04",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "11743285.80",
+        "vat": "0.00",
+        "net": "11743285.80"
+      }
+    },
+    {
+      "id": "rev-029",
+      "input": {
+        "gross": "6011879.67",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "6011879.67",
+        "vat": "0.00",
+        "net": "6011879.67"
+      }
+    },
+    {
+      "id": "rev-030",
+      "input": {
+        "gross": "5745027.58",
+        "rateCode": "STANDARD",
+        "date": "2032-05-27",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "5745027.58",
+        "vat": "957504.60",
+        "net": "4787522.98"
+      }
+    },
+    {
+      "id": "rev-031",
+      "input": {
+        "gross": "2248363.01",
+        "rateCode": "REDUCED",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "2248363.01",
+        "vat": "176139.04",
+        "net": "2072223.97"
+      }
+    },
+    {
+      "id": "rev-032",
+      "input": {
+        "gross": "-8295008.99",
+        "rateCode": "REDUCED",
+        "date": "2032-06-03",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "-8295008.99",
+        "vat": "-649839.41",
+        "net": "-7645169.58"
+      }
+    },
+    {
+      "id": "rev-033",
+      "input": {
+        "gross": "5811036.87",
+        "rateCode": "ZERO",
+        "date": "2028-12-04",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "5811036.87",
+        "vat": "0.00",
+        "net": "5811036.87"
+      }
+    },
+    {
+      "id": "rev-034",
+      "input": {
+        "gross": "5593203.41",
+        "rateCode": "ZERO",
+        "date": "2028-01-06",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "5593203.41",
+        "vat": "0.00",
+        "net": "5593203.41"
+      }
+    },
+    {
+      "id": "rev-035",
+      "input": {
+        "gross": "3372543.39",
+        "rateCode": "STANDARD",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "3372543.39",
+        "vat": "514455.77",
+        "net": "2858087.62"
+      }
+    },
+    {
+      "id": "rev-036",
+      "input": {
+        "gross": "107205.00",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "107205.00",
+        "vat": "0.00",
+        "net": "107205.00"
+      }
+    },
+    {
+      "id": "rev-037",
+      "input": {
+        "gross": "654372.63",
+        "rateCode": "ZERO",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "654372.63",
+        "vat": "0.00",
+        "net": "654372.63"
+      }
+    },
+    {
+      "id": "rev-038",
+      "input": {
+        "gross": "1568437.07",
+        "rateCode": "REDUCED",
+        "date": "2028-03-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1568437.07",
+        "vat": "122872.95",
+        "net": "1445564.12"
+      }
+    },
+    {
+      "id": "rev-039",
+      "input": {
+        "gross": "6981409.93",
+        "rateCode": "ZERO",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "6981409.93",
+        "vat": "0.00",
+        "net": "6981409.93"
+      }
+    },
+    {
+      "id": "rev-040",
+      "input": {
+        "gross": "8659937.86",
+        "rateCode": "REDUCED",
+        "date": "2032-07-29",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "8659937.86",
+        "vat": "678428.31",
+        "net": "7981509.55"
+      }
+    },
+    {
+      "id": "rev-041",
+      "input": {
+        "gross": "3519953.10",
+        "rateCode": "REDUCED",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "3519953.10",
+        "vat": "275756.69",
+        "net": "3244196.41"
+      }
+    },
+    {
+      "id": "rev-042",
+      "input": {
+        "gross": "6548195.60",
+        "rateCode": "EXEMPT",
+        "date": "2030-12-24",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "6548195.60",
+        "vat": "0.00",
+        "net": "6548195.60"
+      }
+    },
+    {
+      "id": "rev-043",
+      "input": {
+        "gross": "6475768.89",
+        "rateCode": "EXEMPT",
+        "date": "2028-12-16",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "6475768.89",
+        "vat": "0.00",
+        "net": "6475768.89"
+      }
+    },
+    {
+      "id": "rev-044",
+      "input": {
+        "gross": "1212321.10",
+        "rateCode": "REDUCED",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1212321.10",
+        "vat": "94974.46",
+        "net": "1117346.64"
+      }
+    },
+    {
+      "id": "rev-045",
+      "input": {
+        "gross": "6128435.01",
+        "rateCode": "REDUCED",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "6128435.01",
+        "vat": "480107.81",
+        "net": "5648327.20"
+      }
+    },
+    {
+      "id": "rev-046",
+      "input": {
+        "gross": "3762599.12",
+        "rateCode": "EXEMPT",
+        "date": "2032-06-28",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "3762599.12",
+        "vat": "0.00",
+        "net": "3762599.12"
+      }
+    },
+    {
+      "id": "rev-047",
+      "input": {
+        "gross": "1278706.80",
+        "rateCode": "REDUCED",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1278706.80",
+        "vat": "100175.19",
+        "net": "1178531.61"
+      }
+    },
+    {
+      "id": "rev-048",
+      "input": {
+        "gross": "618616.52",
+        "rateCode": "REDUCED",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "618616.52",
+        "vat": "48463.05",
+        "net": "570153.47"
+      }
+    },
+    {
+      "id": "rev-049",
+      "input": {
+        "gross": "1349071.87",
+        "rateCode": "ZERO",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1349071.87",
+        "vat": "0.00",
+        "net": "1349071.87"
+      }
+    },
+    {
+      "id": "rev-050",
+      "input": {
+        "gross": "5855883.41",
+        "rateCode": "EXEMPT",
+        "date": "2030-08-24",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "5855883.41",
+        "vat": "0.00",
+        "net": "5855883.41"
+      }
+    },
+    {
+      "id": "rev-051",
+      "input": {
+        "gross": "373182.31",
+        "rateCode": "STANDARD",
+        "date": "2032-10-10",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "373182.31",
+        "vat": "62197.05",
+        "net": "310985.26"
+      }
+    },
+    {
+      "id": "rev-052",
+      "input": {
+        "gross": "147465.69",
+        "rateCode": "STANDARD",
+        "date": "2029-06-24",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "147465.69",
+        "vat": "22494.76",
+        "net": "124970.93"
+      }
+    },
+    {
+      "id": "rev-053",
+      "input": {
+        "gross": "-711890.40",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "-711890.40",
+        "vat": "0.00",
+        "net": "-711890.40"
+      }
+    },
+    {
+      "id": "rev-054",
+      "input": {
+        "gross": "1241337.57",
+        "rateCode": "ZERO",
+        "date": "2031-02-22",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1241337.57",
+        "vat": "0.00",
+        "net": "1241337.57"
+      }
+    },
+    {
+      "id": "rev-055",
+      "input": {
+        "gross": "541153.00",
+        "rateCode": "STANDARD",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "541153.00",
+        "vat": "90192.16",
+        "net": "450960.84"
+      }
+    },
+    {
+      "id": "rev-056",
+      "input": {
+        "gross": "-1822181.51",
+        "rateCode": "ZERO",
+        "date": "2028-12-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "-1822181.51",
+        "vat": "0.00",
+        "net": "-1822181.51"
+      }
+    },
+    {
+      "id": "rev-057",
+      "input": {
+        "gross": "1738249.02",
+        "rateCode": "ZERO",
+        "date": "2030-05-26",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1738249.02",
+        "vat": "0.00",
+        "net": "1738249.02"
+      }
+    },
+    {
+      "id": "rev-058",
+      "input": {
+        "gross": "-2815651.04",
+        "rateCode": "REDUCED",
+        "date": "2030-07-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "-2815651.04",
+        "vat": "-220580.96",
+        "net": "-2595070.08"
+      }
+    },
+    {
+      "id": "rev-059",
+      "input": {
+        "gross": "2995334.11",
+        "rateCode": "STANDARD",
+        "date": "2032-07-07",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "2995334.11",
+        "vat": "499222.35",
+        "net": "2496111.76"
+      }
+    },
+    {
+      "id": "rev-060",
+      "input": {
+        "gross": "11998097.92",
+        "rateCode": "ZERO",
+        "date": "2030-01-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "11998097.92",
+        "vat": "0.00",
+        "net": "11998097.92"
+      }
+    },
+    {
+      "id": "rev-061",
+      "input": {
+        "gross": "2014764.56",
+        "rateCode": "STANDARD",
+        "date": "2030-02-20",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "2014764.56",
+        "vat": "307336.96",
+        "net": "1707427.60"
+      }
+    },
+    {
+      "id": "rev-062",
+      "input": {
+        "gross": "4263809.31",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "4263809.31",
+        "vat": "0.00",
+        "net": "4263809.31"
+      }
+    },
+    {
+      "id": "rev-063",
+      "input": {
+        "gross": "1885297.12",
+        "rateCode": "ZERO",
+        "date": "2029-09-17",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1885297.12",
+        "vat": "0.00",
+        "net": "1885297.12"
+      }
+    },
+    {
+      "id": "rev-064",
+      "input": {
+        "gross": "1219940.17",
+        "rateCode": "REDUCED",
+        "date": "2032-08-14",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1219940.17",
+        "vat": "95571.35",
+        "net": "1124368.82"
+      }
+    },
+    {
+      "id": "rev-065",
+      "input": {
+        "gross": "1385130.15",
+        "rateCode": "ZERO",
+        "date": "2028-07-03",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1385130.15",
+        "vat": "0.00",
+        "net": "1385130.15"
+      }
+    },
+    {
+      "id": "rev-066",
+      "input": {
+        "gross": "6207452.38",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "6207452.38",
+        "vat": "0.00",
+        "net": "6207452.38"
+      }
+    },
+    {
+      "id": "rev-067",
+      "input": {
+        "gross": "9590906.93",
+        "rateCode": "EXEMPT",
+        "date": "2030-11-10",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "9590906.93",
+        "vat": "0.00",
+        "net": "9590906.93"
+      }
+    },
+    {
+      "id": "rev-068",
+      "input": {
+        "gross": "8588.36",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "8588.36",
+        "vat": "0.00",
+        "net": "8588.36"
+      }
+    },
+    {
+      "id": "rev-069",
+      "input": {
+        "gross": "7356258.86",
+        "rateCode": "STANDARD",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "7356258.86",
+        "vat": "1122141.18",
+        "net": "6234117.68"
+      }
+    },
+    {
+      "id": "rev-070",
+      "input": {
+        "gross": "3280144.94",
+        "rateCode": "REDUCED",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "3280144.94",
+        "vat": "256969.88",
+        "net": "3023175.06"
+      }
+    },
+    {
+      "id": "rev-071",
+      "input": {
+        "gross": "5069180.58",
+        "rateCode": "REDUCED",
+        "date": "2031-01-20",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "5069180.58",
+        "vat": "397124.75",
+        "net": "4672055.83"
+      }
+    },
+    {
+      "id": "rev-072",
+      "input": {
+        "gross": "-543184.36",
+        "rateCode": "EXEMPT",
+        "date": "2030-11-09",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "-543184.36",
+        "vat": "0.00",
+        "net": "-543184.36"
+      }
+    },
+    {
+      "id": "rev-073",
+      "input": {
+        "gross": "-5340967.82",
+        "rateCode": "REDUCED",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "-5340967.82",
+        "vat": "-418416.83",
+        "net": "-4922550.99"
+      }
+    },
+    {
+      "id": "rev-074",
+      "input": {
+        "gross": "-2865912.31",
+        "rateCode": "STANDARD",
+        "date": "2031-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "-2865912.31",
+        "vat": "-477652.05",
+        "net": "-2388260.26"
+      }
+    },
+    {
+      "id": "rev-075",
+      "input": {
+        "gross": "8941960.28",
+        "rateCode": "ZERO",
+        "date": "2028-03-29",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "8941960.28",
+        "vat": "0.00",
+        "net": "8941960.28"
+      }
+    },
+    {
+      "id": "rev-076",
+      "input": {
+        "gross": "1010522.42",
+        "rateCode": "REDUCED",
+        "date": "2031-05-07",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1010522.42",
+        "vat": "79165.35",
+        "net": "931357.07"
+      }
+    },
+    {
+      "id": "rev-077",
+      "input": {
+        "gross": "190237.06",
+        "rateCode": "REDUCED",
+        "date": "2031-04-20",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "190237.06",
+        "vat": "14903.36",
+        "net": "175333.70"
+      }
+    },
+    {
+      "id": "rev-078",
+      "input": {
+        "gross": "512281.45",
+        "rateCode": "STANDARD",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "512281.45",
+        "vat": "78144.63",
+        "net": "434136.82"
+      }
+    },
+    {
+      "id": "rev-079",
+      "input": {
+        "gross": "6752938.43",
+        "rateCode": "STANDARD",
+        "date": "2029-08-10",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "6752938.43",
+        "vat": "1030109.25",
+        "net": "5722829.18"
+      }
+    },
+    {
+      "id": "rev-080",
+      "input": {
+        "gross": "5165390.97",
+        "rateCode": "EXEMPT",
+        "date": "2031-09-11",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "5165390.97",
+        "vat": "0.00",
+        "net": "5165390.97"
+      }
+    },
+    {
+      "id": "rev-081",
+      "input": {
+        "gross": "7382550.71",
+        "rateCode": "REDUCED",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "7382550.71",
+        "vat": "578356.51",
+        "net": "6804194.20"
+      }
+    },
+    {
+      "id": "rev-082",
+      "input": {
+        "gross": "4169214.04",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "4169214.04",
+        "vat": "0.00",
+        "net": "4169214.04"
+      }
+    },
+    {
+      "id": "rev-083",
+      "input": {
+        "gross": "6996859.13",
+        "rateCode": "REDUCED",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "6996859.13",
+        "vat": "548141.04",
+        "net": "6448718.09"
+      }
+    },
+    {
+      "id": "rev-084",
+      "input": {
+        "gross": "610840.46",
+        "rateCode": "ZERO",
+        "date": "2028-05-17",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "610840.46",
+        "vat": "0.00",
+        "net": "610840.46"
+      }
+    },
+    {
+      "id": "rev-085",
+      "input": {
+        "gross": "1734839.44",
+        "rateCode": "EXEMPT",
+        "date": "2028-02-20",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "1734839.44",
+        "vat": "0.00",
+        "net": "1734839.44"
+      }
+    },
+    {
+      "id": "rev-086",
+      "input": {
+        "gross": "726457.09",
+        "rateCode": "EXEMPT",
+        "date": "2030-03-14",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "726457.09",
+        "vat": "0.00",
+        "net": "726457.09"
+      }
+    },
+    {
+      "id": "rev-087",
+      "input": {
+        "gross": "6524085.40",
+        "rateCode": "REDUCED",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "6524085.40",
+        "vat": "511103.46",
+        "net": "6012981.94"
+      }
+    },
+    {
+      "id": "rev-088",
+      "input": {
+        "gross": "682477.80",
+        "rateCode": "REDUCED",
+        "date": "2031-05-19",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "682477.80",
+        "vat": "53466.00",
+        "net": "629011.80"
+      }
+    },
+    {
+      "id": "rev-089",
+      "input": {
+        "gross": "2074117.45",
+        "rateCode": "ZERO",
+        "date": "2029-09-04",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "2074117.45",
+        "vat": "0.00",
+        "net": "2074117.45"
+      }
+    },
+    {
+      "id": "rev-090",
+      "input": {
+        "gross": "2515801.25",
+        "rateCode": "ZERO",
+        "date": "2028-04-20",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "2515801.25",
+        "vat": "0.00",
+        "net": "2515801.25"
+      }
+    },
+    {
+      "id": "rev-091",
+      "input": {
+        "gross": "9018296.33",
+        "rateCode": "EXEMPT",
+        "date": "2029-01-02",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "9018296.33",
+        "vat": "0.00",
+        "net": "9018296.33"
+      }
+    },
+    {
+      "id": "rev-092",
+      "input": {
+        "gross": "4739254.90",
+        "rateCode": "EXEMPT",
+        "date": "2030-10-06",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "4739254.90",
+        "vat": "0.00",
+        "net": "4739254.90"
+      }
+    },
+    {
+      "id": "rev-093",
+      "input": {
+        "gross": "5494598.29",
+        "rateCode": "ZERO",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "5494598.29",
+        "vat": "0.00",
+        "net": "5494598.29"
+      }
+    },
+    {
+      "id": "rev-094",
+      "input": {
+        "gross": "3985508.56",
+        "rateCode": "EXEMPT",
+        "date": "2031-04-27",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "3985508.56",
+        "vat": "0.00",
+        "net": "3985508.56"
+      }
+    },
+    {
+      "id": "rev-095",
+      "input": {
+        "gross": "2733291.25",
+        "rateCode": "EXEMPT",
+        "date": "2031-05-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "2733291.25",
+        "vat": "0.00",
+        "net": "2733291.25"
+      }
+    },
+    {
+      "id": "rev-096",
+      "input": {
+        "gross": "708019.22",
+        "rateCode": "REDUCED",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "708019.22",
+        "vat": "55466.94",
+        "net": "652552.28"
+      }
+    },
+    {
+      "id": "rev-097",
+      "input": {
+        "gross": "3639283.44",
+        "rateCode": "ZERO",
+        "date": "2030-06-14",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "3639283.44",
+        "vat": "0.00",
+        "net": "3639283.44"
+      }
+    },
+    {
+      "id": "rev-098",
+      "input": {
+        "gross": "4652303.63",
+        "rateCode": "STANDARD",
+        "date": "2030-03-31",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "4652303.63",
+        "vat": "709673.44",
+        "net": "3942630.19"
+      }
+    },
+    {
+      "id": "rev-099",
+      "input": {
+        "gross": "4580192.25",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "4580192.25",
+        "vat": "0.00",
+        "net": "4580192.25"
+      }
+    },
+    {
+      "id": "rev-100",
+      "input": {
+        "gross": "11131560.43",
+        "rateCode": "ZERO",
+        "date": "2029-11-09",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "11131560.43",
+        "vat": "0.00",
+        "net": "11131560.43"
+      }
+    },
+    {
+      "id": "rev-101",
+      "input": {
+        "gross": "-8745737.12",
+        "rateCode": "ZERO",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "-8745737.12",
+        "vat": "0.00",
+        "net": "-8745737.12"
+      }
+    },
+    {
+      "id": "rev-102",
+      "input": {
+        "gross": "2191347.78",
+        "rateCode": "ZERO",
+        "date": "2028-07-28",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "2191347.78",
+        "vat": "0.00",
+        "net": "2191347.78"
+      }
+    },
+    {
+      "id": "rev-103",
+      "input": {
+        "gross": "6546281.90",
+        "rateCode": "EXEMPT",
+        "date": "2028-02-05",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "6546281.90",
+        "vat": "0.00",
+        "net": "6546281.90"
+      }
+    },
+    {
+      "id": "rev-104",
+      "input": {
+        "gross": "7915544.47",
+        "rateCode": "STANDARD",
+        "date": "2030-12-08",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "7915544.47",
+        "vat": "1319257.41",
+        "net": "6596287.06"
+      }
+    },
+    {
+      "id": "rev-105",
+      "input": {
+        "gross": "33100.60",
+        "rateCode": "STANDARD",
+        "date": "2030-12-11",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "33100.60",
+        "vat": "5516.77",
+        "net": "27583.83"
+      }
+    },
+    {
+      "id": "rev-106",
+      "input": {
+        "gross": "3340140.52",
+        "rateCode": "REDUCED",
+        "date": "2030-08-18",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "3340140.52",
+        "vat": "261669.99",
+        "net": "3078470.53"
+      }
+    },
+    {
+      "id": "rev-107",
+      "input": {
+        "gross": "2440.60",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "2440.60",
+        "vat": "0.00",
+        "net": "2440.60"
+      }
+    },
+    {
+      "id": "rev-108",
+      "input": {
+        "gross": "6922304.99",
+        "rateCode": "REDUCED",
+        "date": "2029-07-13",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "6922304.99",
+        "vat": "542300.39",
+        "net": "6380004.60"
+      }
+    },
+    {
+      "id": "rev-109",
+      "input": {
+        "gross": "6127576.33",
+        "rateCode": "STANDARD",
+        "date": "2028-01-31",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "6127576.33",
+        "vat": "934715.04",
+        "net": "5192861.29"
+      }
+    },
+    {
+      "id": "rev-110",
+      "input": {
+        "gross": "4770663.93",
+        "rateCode": "REDUCED",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "4770663.93",
+        "vat": "373738.65",
+        "net": "4396925.28"
+      }
+    },
+    {
+      "id": "rev-111",
+      "input": {
+        "gross": "-87466.35",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "-87466.35",
+        "vat": "0.00",
+        "net": "-87466.35"
+      }
+    },
+    {
+      "id": "rev-112",
+      "input": {
+        "gross": "4435219.18",
+        "rateCode": "STANDARD",
+        "date": "2032-06-12",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "4435219.18",
+        "vat": "739203.20",
+        "net": "3696015.98"
+      }
+    },
+    {
+      "id": "rev-113",
+      "input": {
+        "gross": "57557.13",
+        "rateCode": "ZERO",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "57557.13",
+        "vat": "0.00",
+        "net": "57557.13"
+      }
+    },
+    {
+      "id": "rev-114",
+      "input": {
+        "gross": "3124216.33",
+        "rateCode": "ZERO",
+        "date": "2031-03-16",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "3124216.33",
+        "vat": "0.00",
+        "net": "3124216.33"
+      }
+    },
+    {
+      "id": "rev-115",
+      "input": {
+        "gross": "6115510.23",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "6115510.23",
+        "vat": "0.00",
+        "net": "6115510.23"
+      }
+    },
+    {
+      "id": "rev-116",
+      "input": {
+        "gross": "5050861.21",
+        "rateCode": "STANDARD",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "5050861.21",
+        "vat": "770470.35",
+        "net": "4280390.86"
+      }
+    },
+    {
+      "id": "rev-117",
+      "input": {
+        "gross": "2437406.99",
+        "rateCode": "ZERO",
+        "date": "2029-11-20",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "2437406.99",
+        "vat": "0.00",
+        "net": "2437406.99"
+      }
+    },
+    {
+      "id": "rev-118",
+      "input": {
+        "gross": "125889.40",
+        "rateCode": "REDUCED",
+        "date": "2031-05-17",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "125889.40",
+        "vat": "9862.30",
+        "net": "116027.10"
+      }
+    },
+    {
+      "id": "rev-119",
+      "input": {
+        "gross": "2553787.26",
+        "rateCode": "REDUCED",
+        "date": "2031-08-17",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "2553787.26",
+        "vat": "200066.29",
+        "net": "2353720.97"
+      }
+    },
+    {
+      "id": "rev-120",
+      "input": {
+        "gross": "7853786.57",
+        "rateCode": "ZERO",
+        "date": "2032-08-19",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "7853786.57",
+        "vat": "0.00",
+        "net": "7853786.57"
+      }
+    },
+    {
+      "id": "rev-121",
+      "input": {
+        "gross": "10725515.14",
+        "rateCode": "REDUCED",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "10725515.14",
+        "vat": "840247.73",
+        "net": "9885267.41"
+      }
+    },
+    {
+      "id": "rev-122",
+      "input": {
+        "gross": "5398735.75",
+        "rateCode": "REDUCED",
+        "date": "2028-06-11",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "5398735.75",
+        "vat": "422942.43",
+        "net": "4975793.32"
+      }
+    },
+    {
+      "id": "rev-123",
+      "input": {
+        "gross": "1143388.32",
+        "rateCode": "REDUCED",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1143388.32",
+        "vat": "89574.20",
+        "net": "1053814.12"
+      }
+    },
+    {
+      "id": "rev-124",
+      "input": {
+        "gross": "4598967.01",
+        "rateCode": "REDUCED",
+        "date": "2029-08-28",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "4598967.01",
+        "vat": "360287.74",
+        "net": "4238679.27"
+      }
+    },
+    {
+      "id": "rev-125",
+      "input": {
+        "gross": "10272624.05",
+        "rateCode": "REDUCED",
+        "date": "2028-02-03",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "10272624.05",
+        "vat": "804767.78",
+        "net": "9467856.27"
+      }
+    },
+    {
+      "id": "rev-126",
+      "input": {
+        "gross": "2279096.79",
+        "rateCode": "REDUCED",
+        "date": "2030-04-23",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "2279096.79",
+        "vat": "178546.75",
+        "net": "2100550.04"
+      }
+    },
+    {
+      "id": "rev-127",
+      "input": {
+        "gross": "-1802645.60",
+        "rateCode": "ZERO",
+        "date": "2030-04-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "-1802645.60",
+        "vat": "0.00",
+        "net": "-1802645.60"
+      }
+    },
+    {
+      "id": "rev-128",
+      "input": {
+        "gross": "-52780.45",
+        "rateCode": "EXEMPT",
+        "date": "2028-12-22",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "-52780.45",
+        "vat": "0.00",
+        "net": "-52780.45"
+      }
+    },
+    {
+      "id": "rev-129",
+      "input": {
+        "gross": "2234747.35",
+        "rateCode": "STANDARD",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "2234747.35",
+        "vat": "372457.89",
+        "net": "1862289.46"
+      }
+    },
+    {
+      "id": "rev-130",
+      "input": {
+        "gross": "305521.15",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "305521.15",
+        "vat": "0.00",
+        "net": "305521.15"
+      }
+    },
+    {
+      "id": "rev-131",
+      "input": {
+        "gross": "6639.25",
+        "rateCode": "EXEMPT",
+        "date": "2030-11-01",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "6639.25",
+        "vat": "0.00",
+        "net": "6639.25"
+      }
+    },
+    {
+      "id": "rev-132",
+      "input": {
+        "gross": "653703.77",
+        "rateCode": "ZERO",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "653703.77",
+        "vat": "0.00",
+        "net": "653703.77"
+      }
+    },
+    {
+      "id": "rev-133",
+      "input": {
+        "gross": "38166.91",
+        "rateCode": "REDUCED",
+        "date": "2031-09-25",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "38166.91",
+        "vat": "2990.03",
+        "net": "35176.88"
+      }
+    },
+    {
+      "id": "rev-134",
+      "input": {
+        "gross": "2783995.08",
+        "rateCode": "EXEMPT",
+        "date": "2031-10-13",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "2783995.08",
+        "vat": "0.00",
+        "net": "2783995.08"
+      }
+    },
+    {
+      "id": "rev-135",
+      "input": {
+        "gross": "7141039.71",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "7141039.71",
+        "vat": "0.00",
+        "net": "7141039.71"
+      }
+    },
+    {
+      "id": "rev-136",
+      "input": {
+        "gross": "-8922788.79",
+        "rateCode": "REDUCED",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "-8922788.79",
+        "vat": "-699020.32",
+        "net": "-8223768.47"
+      }
+    },
+    {
+      "id": "rev-137",
+      "input": {
+        "gross": "2738399.78",
+        "rateCode": "STANDARD",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "2738399.78",
+        "vat": "456399.96",
+        "net": "2281999.82"
+      }
+    },
+    {
+      "id": "rev-138",
+      "input": {
+        "gross": "3504233.80",
+        "rateCode": "ZERO",
+        "date": "2032-10-23",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "3504233.80",
+        "vat": "0.00",
+        "net": "3504233.80"
+      }
+    },
+    {
+      "id": "rev-139",
+      "input": {
+        "gross": "5643113.58",
+        "rateCode": "STANDARD",
+        "date": "2029-01-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "5643113.58",
+        "vat": "860813.94",
+        "net": "4782299.64"
+      }
+    },
+    {
+      "id": "rev-140",
+      "input": {
+        "gross": "57949.39",
+        "rateCode": "REDUCED",
+        "date": "2032-01-27",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "57949.39",
+        "vat": "4539.81",
+        "net": "53409.58"
+      }
+    },
+    {
+      "id": "rev-141",
+      "input": {
+        "gross": "1686111.26",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "1686111.26",
+        "vat": "0.00",
+        "net": "1686111.26"
+      }
+    },
+    {
+      "id": "rev-142",
+      "input": {
+        "gross": "8250213.71",
+        "rateCode": "STANDARD",
+        "date": "2030-12-15",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "8250213.71",
+        "vat": "1375035.62",
+        "net": "6875178.09"
+      }
+    },
+    {
+      "id": "rev-143",
+      "input": {
+        "gross": "5295997.78",
+        "rateCode": "ZERO",
+        "date": "2031-11-27",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "5295997.78",
+        "vat": "0.00",
+        "net": "5295997.78"
+      }
+    },
+    {
+      "id": "rev-144",
+      "input": {
+        "gross": "3556204.60",
+        "rateCode": "STANDARD",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "3556204.60",
+        "vat": "592700.77",
+        "net": "2963503.83"
+      }
+    },
+    {
+      "id": "rev-145",
+      "input": {
+        "gross": "5987945.42",
+        "rateCode": "ZERO",
+        "date": "2029-03-27",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "5987945.42",
+        "vat": "0.00",
+        "net": "5987945.42"
+      }
+    },
+    {
+      "id": "rev-146",
+      "input": {
+        "gross": "3405812.67",
+        "rateCode": "REDUCED",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "3405812.67",
+        "vat": "266814.82",
+        "net": "3138997.85"
+      }
+    },
+    {
+      "id": "rev-147",
+      "input": {
+        "gross": "3585283.58",
+        "rateCode": "EXEMPT",
+        "date": "2031-01-04",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "3585283.58",
+        "vat": "0.00",
+        "net": "3585283.58"
+      }
+    },
+    {
+      "id": "rev-148",
+      "input": {
+        "gross": "1767569.21",
+        "rateCode": "ZERO",
+        "date": "2030-09-27",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1767569.21",
+        "vat": "0.00",
+        "net": "1767569.21"
+      }
+    },
+    {
+      "id": "rev-149",
+      "input": {
+        "gross": "2714278.26",
+        "rateCode": "ZERO",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "2714278.26",
+        "vat": "0.00",
+        "net": "2714278.26"
+      }
+    },
+    {
+      "id": "rev-150",
+      "input": {
+        "gross": "6954.86",
+        "rateCode": "REDUCED",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "6954.86",
+        "vat": "544.85",
+        "net": "6410.01"
+      }
+    },
+    {
+      "id": "rev-151",
+      "input": {
+        "gross": "4526800.21",
+        "rateCode": "REDUCED",
+        "date": "2029-04-06",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "4526800.21",
+        "vat": "354634.12",
+        "net": "4172166.09"
+      }
+    },
+    {
+      "id": "rev-152",
+      "input": {
+        "gross": "526348.18",
+        "rateCode": "ZERO",
+        "date": "2032-02-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "526348.18",
+        "vat": "0.00",
+        "net": "526348.18"
+      }
+    },
+    {
+      "id": "rev-153",
+      "input": {
+        "gross": "5361585.22",
+        "rateCode": "STANDARD",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "5361585.22",
+        "vat": "893597.54",
+        "net": "4467987.68"
+      }
+    },
+    {
+      "id": "rev-154",
+      "input": {
+        "gross": "8011727.17",
+        "rateCode": "STANDARD",
+        "date": "2030-08-30",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "8011727.17",
+        "vat": "1335287.86",
+        "net": "6676439.31"
+      }
+    },
+    {
+      "id": "rev-155",
+      "input": {
+        "gross": "4875902.59",
+        "rateCode": "STANDARD",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "4875902.59",
+        "vat": "812650.43",
+        "net": "4063252.16"
+      }
+    },
+    {
+      "id": "rev-156",
+      "input": {
+        "gross": "5310223.09",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "5310223.09",
+        "vat": "0.00",
+        "net": "5310223.09"
+      }
+    },
+    {
+      "id": "rev-157",
+      "input": {
+        "gross": "7437860.91",
+        "rateCode": "EXEMPT",
+        "date": "2032-09-26",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "7437860.91",
+        "vat": "0.00",
+        "net": "7437860.91"
+      }
+    },
+    {
+      "id": "rev-158",
+      "input": {
+        "gross": "707856.09",
+        "rateCode": "STANDARD",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "707856.09",
+        "vat": "107978.05",
+        "net": "599878.04"
+      }
+    },
+    {
+      "id": "rev-159",
+      "input": {
+        "gross": "-2038524.43",
+        "rateCode": "ZERO",
+        "date": "2031-07-27",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "-2038524.43",
+        "vat": "0.00",
+        "net": "-2038524.43"
+      }
+    },
+    {
+      "id": "rev-160",
+      "input": {
+        "gross": "633082.01",
+        "rateCode": "REDUCED",
+        "date": "2032-11-13",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "633082.01",
+        "vat": "49596.29",
+        "net": "583485.72"
+      }
+    },
+    {
+      "id": "rev-161",
+      "input": {
+        "gross": "152814.31",
+        "rateCode": "REDUCED",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "152814.31",
+        "vat": "11971.63",
+        "net": "140842.68"
+      }
+    },
+    {
+      "id": "rev-162",
+      "input": {
+        "gross": "5067775.39",
+        "rateCode": "ZERO",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "5067775.39",
+        "vat": "0.00",
+        "net": "5067775.39"
+      }
+    },
+    {
+      "id": "rev-163",
+      "input": {
+        "gross": "973283.37",
+        "rateCode": "ZERO",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "973283.37",
+        "vat": "0.00",
+        "net": "973283.37"
+      }
+    },
+    {
+      "id": "rev-164",
+      "input": {
+        "gross": "3947873.32",
+        "rateCode": "ZERO",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "3947873.32",
+        "vat": "0.00",
+        "net": "3947873.32"
+      }
+    },
+    {
+      "id": "rev-165",
+      "input": {
+        "gross": "2937382.82",
+        "rateCode": "STANDARD",
+        "date": "2029-05-04",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "2937382.82",
+        "vat": "448075.35",
+        "net": "2489307.47"
+      }
+    },
+    {
+      "id": "rev-166",
+      "input": {
+        "gross": "6717958.62",
+        "rateCode": "STANDARD",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "6717958.62",
+        "vat": "1119659.77",
+        "net": "5598298.85"
+      }
+    },
+    {
+      "id": "rev-167",
+      "input": {
+        "gross": "2009697.84",
+        "rateCode": "STANDARD",
+        "date": "2030-08-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "2009697.84",
+        "vat": "334949.64",
+        "net": "1674748.20"
+      }
+    },
+    {
+      "id": "rev-168",
+      "input": {
+        "gross": "1301498.81",
+        "rateCode": "ZERO",
+        "date": "2030-10-05",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1301498.81",
+        "vat": "0.00",
+        "net": "1301498.81"
+      }
+    },
+    {
+      "id": "rev-169",
+      "input": {
+        "gross": "4475548.55",
+        "rateCode": "EXEMPT",
+        "date": "2032-06-06",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "4475548.55",
+        "vat": "0.00",
+        "net": "4475548.55"
+      }
+    },
+    {
+      "id": "rev-170",
+      "input": {
+        "gross": "12227675.58",
+        "rateCode": "STANDARD",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "12227675.58",
+        "vat": "1865238.65",
+        "net": "10362436.93"
+      }
+    },
+    {
+      "id": "rev-171",
+      "input": {
+        "gross": "2147770.74",
+        "rateCode": "STANDARD",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "2147770.74",
+        "vat": "357961.79",
+        "net": "1789808.95"
+      }
+    },
+    {
+      "id": "rev-172",
+      "input": {
+        "gross": "932440.56",
+        "rateCode": "REDUCED",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "932440.56",
+        "vat": "73048.34",
+        "net": "859392.22"
+      }
+    },
+    {
+      "id": "rev-173",
+      "input": {
+        "gross": "9249329.18",
+        "rateCode": "EXEMPT",
+        "date": "2031-09-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "9249329.18",
+        "vat": "0.00",
+        "net": "9249329.18"
+      }
+    },
+    {
+      "id": "rev-174",
+      "input": {
+        "gross": "9990579.40",
+        "rateCode": "STANDARD",
+        "date": "2031-09-10",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "9990579.40",
+        "vat": "1665096.57",
+        "net": "8325482.83"
+      }
+    },
+    {
+      "id": "rev-175",
+      "input": {
+        "gross": "7158846.50",
+        "rateCode": "STANDARD",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "7158846.50",
+        "vat": "1193141.09",
+        "net": "5965705.41"
+      }
+    },
+    {
+      "id": "rev-176",
+      "input": {
+        "gross": "5599739.41",
+        "rateCode": "STANDARD",
+        "date": "2029-06-11",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "5599739.41",
+        "vat": "854197.54",
+        "net": "4745541.87"
+      }
+    },
+    {
+      "id": "rev-177",
+      "input": {
+        "gross": "7216807.33",
+        "rateCode": "EXEMPT",
+        "date": "2028-03-05",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "7216807.33",
+        "vat": "0.00",
+        "net": "7216807.33"
+      }
+    },
+    {
+      "id": "rev-178",
+      "input": {
+        "gross": "6316054.61",
+        "rateCode": "STANDARD",
+        "date": "2030-08-28",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "6316054.61",
+        "vat": "1052675.77",
+        "net": "5263378.84"
+      }
+    },
+    {
+      "id": "rev-179",
+      "input": {
+        "gross": "2084391.68",
+        "rateCode": "REDUCED",
+        "date": "2032-04-17",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "2084391.68",
+        "vat": "163293.36",
+        "net": "1921098.32"
+      }
+    },
+    {
+      "id": "rev-180",
+      "input": {
+        "gross": "1531576.53",
+        "rateCode": "REDUCED",
+        "date": "2031-09-26",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1531576.53",
+        "vat": "119985.26",
+        "net": "1411591.27"
+      }
+    },
+    {
+      "id": "rev-181",
+      "input": {
+        "gross": "1454034.93",
+        "rateCode": "REDUCED",
+        "date": "2028-06-07",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1454034.93",
+        "vat": "113910.57",
+        "net": "1340124.36"
+      }
+    },
+    {
+      "id": "rev-182",
+      "input": {
+        "gross": "1293491.20",
+        "rateCode": "STANDARD",
+        "date": "2030-07-10",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "1293491.20",
+        "vat": "215581.86",
+        "net": "1077909.34"
+      }
+    },
+    {
+      "id": "rev-183",
+      "input": {
+        "gross": "10356486.06",
+        "rateCode": "ZERO",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "10356486.06",
+        "vat": "0.00",
+        "net": "10356486.06"
+      }
+    },
+    {
+      "id": "rev-184",
+      "input": {
+        "gross": "7047156.44",
+        "rateCode": "ZERO",
+        "date": "2030-11-18",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "7047156.44",
+        "vat": "0.00",
+        "net": "7047156.44"
+      }
+    },
+    {
+      "id": "rev-185",
+      "input": {
+        "gross": "1099262.59",
+        "rateCode": "EXEMPT",
+        "date": "2028-08-13",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "1099262.59",
+        "vat": "0.00",
+        "net": "1099262.59"
+      }
+    },
+    {
+      "id": "rev-186",
+      "input": {
+        "gross": "911650.22",
+        "rateCode": "ZERO",
+        "date": "2032-01-14",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "911650.22",
+        "vat": "0.00",
+        "net": "911650.22"
+      }
+    },
+    {
+      "id": "rev-187",
+      "input": {
+        "gross": "2944344.95",
+        "rateCode": "STANDARD",
+        "date": "2030-02-13",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "2944344.95",
+        "vat": "449137.37",
+        "net": "2495207.58"
+      }
+    },
+    {
+      "id": "rev-188",
+      "input": {
+        "gross": "5315055.08",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "5315055.08",
+        "vat": "0.00",
+        "net": "5315055.08"
+      }
+    },
+    {
+      "id": "rev-189",
+      "input": {
+        "gross": "4067974.37",
+        "rateCode": "STANDARD",
+        "date": "2032-04-19",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "4067974.37",
+        "vat": "677995.72",
+        "net": "3389978.65"
+      }
+    },
+    {
+      "id": "rev-190",
+      "input": {
+        "gross": "1920857.82",
+        "rateCode": "ZERO",
+        "date": "2031-05-20",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1920857.82",
+        "vat": "0.00",
+        "net": "1920857.82"
+      }
+    },
+    {
+      "id": "rev-191",
+      "input": {
+        "gross": "4442464.80",
+        "rateCode": "ZERO",
+        "date": "2028-04-14",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "4442464.80",
+        "vat": "0.00",
+        "net": "4442464.80"
+      }
+    },
+    {
+      "id": "rev-192",
+      "input": {
+        "gross": "7879185.00",
+        "rateCode": "STANDARD",
+        "date": "2028-10-26",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "7879185.00",
+        "vat": "1201909.58",
+        "net": "6677275.42"
+      }
+    },
+    {
+      "id": "rev-193",
+      "input": {
+        "gross": "7341468.21",
+        "rateCode": "REDUCED",
+        "date": "2032-10-17",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "7341468.21",
+        "vat": "575138.06",
+        "net": "6766330.15"
+      }
+    },
+    {
+      "id": "rev-194",
+      "input": {
+        "gross": "4426244.19",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "4426244.19",
+        "vat": "0.00",
+        "net": "4426244.19"
+      }
+    },
+    {
+      "id": "rev-195",
+      "input": {
+        "gross": "4292406.60",
+        "rateCode": "STANDARD",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "4292406.60",
+        "vat": "654773.89",
+        "net": "3637632.71"
+      }
+    },
+    {
+      "id": "rev-196",
+      "input": {
+        "gross": "2914474.99",
+        "rateCode": "REDUCED",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "2914474.99",
+        "vat": "228322.93",
+        "net": "2686152.06"
+      }
+    },
+    {
+      "id": "rev-197",
+      "input": {
+        "gross": "3247739.52",
+        "rateCode": "REDUCED",
+        "date": "2031-09-26",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "3247739.52",
+        "vat": "254431.21",
+        "net": "2993308.31"
+      }
+    },
+    {
+      "id": "rev-198",
+      "input": {
+        "gross": "147916.25",
+        "rateCode": "REDUCED",
+        "date": "2031-06-26",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "147916.25",
+        "vat": "11587.91",
+        "net": "136328.34"
+      }
+    },
+    {
+      "id": "rev-199",
+      "input": {
+        "gross": "2133066.47",
+        "rateCode": "STANDARD",
+        "date": "2030-12-13",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "2133066.47",
+        "vat": "355511.08",
+        "net": "1777555.39"
+      }
+    },
+    {
+      "id": "rev-200",
+      "input": {
+        "gross": "182221.98",
+        "rateCode": "STANDARD",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "182221.98",
+        "vat": "30370.33",
+        "net": "151851.65"
+      }
+    },
+    {
+      "id": "rev-201",
+      "input": {
+        "gross": "1322127.60",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "1322127.60",
+        "vat": "0.00",
+        "net": "1322127.60"
+      }
+    },
+    {
+      "id": "rev-202",
+      "input": {
+        "gross": "-11880493.45",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "-11880493.45",
+        "vat": "0.00",
+        "net": "-11880493.45"
+      }
+    },
+    {
+      "id": "rev-203",
+      "input": {
+        "gross": "2937942.73",
+        "rateCode": "ZERO",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "2937942.73",
+        "vat": "0.00",
+        "net": "2937942.73"
+      }
+    },
+    {
+      "id": "rev-204",
+      "input": {
+        "gross": "9963015.29",
+        "rateCode": "STANDARD",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "9963015.29",
+        "vat": "1519781.99",
+        "net": "8443233.30"
+      }
+    },
+    {
+      "id": "rev-205",
+      "input": {
+        "gross": "5570500.72",
+        "rateCode": "REDUCED",
+        "date": "2029-11-12",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "5570500.72",
+        "vat": "436398.67",
+        "net": "5134102.05"
+      }
+    },
+    {
+      "id": "rev-206",
+      "input": {
+        "gross": "87664.35",
+        "rateCode": "STANDARD",
+        "date": "2032-10-08",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "87664.35",
+        "vat": "14610.72",
+        "net": "73053.63"
+      }
+    },
+    {
+      "id": "rev-207",
+      "input": {
+        "gross": "6788795.99",
+        "rateCode": "STANDARD",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "6788795.99",
+        "vat": "1035579.05",
+        "net": "5753216.94"
+      }
+    },
+    {
+      "id": "rev-208",
+      "input": {
+        "gross": "2234109.17",
+        "rateCode": "EXEMPT",
+        "date": "2028-12-31",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "2234109.17",
+        "vat": "0.00",
+        "net": "2234109.17"
+      }
+    },
+    {
+      "id": "rev-209",
+      "input": {
+        "gross": "1062040.54",
+        "rateCode": "EXEMPT",
+        "date": "2031-10-24",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "1062040.54",
+        "vat": "0.00",
+        "net": "1062040.54"
+      }
+    },
+    {
+      "id": "rev-210",
+      "input": {
+        "gross": "-3766518.55",
+        "rateCode": "REDUCED",
+        "date": "2031-07-10",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "-3766518.55",
+        "vat": "-295072.88",
+        "net": "-3471445.67"
+      }
+    },
+    {
+      "id": "rev-211",
+      "input": {
+        "gross": "4438590.50",
+        "rateCode": "REDUCED",
+        "date": "2028-01-14",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "4438590.50",
+        "vat": "347723.68",
+        "net": "4090866.82"
+      }
+    },
+    {
+      "id": "rev-212",
+      "input": {
+        "gross": "377415.98",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "377415.98",
+        "vat": "0.00",
+        "net": "377415.98"
+      }
+    },
+    {
+      "id": "rev-213",
+      "input": {
+        "gross": "1225228.16",
+        "rateCode": "ZERO",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1225228.16",
+        "vat": "0.00",
+        "net": "1225228.16"
+      }
+    },
+    {
+      "id": "rev-214",
+      "input": {
+        "gross": "487961.98",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "487961.98",
+        "vat": "0.00",
+        "net": "487961.98"
+      }
+    },
+    {
+      "id": "rev-215",
+      "input": {
+        "gross": "3432867.17",
+        "rateCode": "EXEMPT",
+        "date": "2030-01-11",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "3432867.17",
+        "vat": "0.00",
+        "net": "3432867.17"
+      }
+    },
+    {
+      "id": "rev-216",
+      "input": {
+        "gross": "9425263.75",
+        "rateCode": "REDUCED",
+        "date": "2030-08-06",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "9425263.75",
+        "vat": "738384.72",
+        "net": "8686879.03"
+      }
+    },
+    {
+      "id": "rev-217",
+      "input": {
+        "gross": "742570.86",
+        "rateCode": "REDUCED",
+        "date": "2030-03-13",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "742570.86",
+        "vat": "58173.75",
+        "net": "684397.11"
+      }
+    },
+    {
+      "id": "rev-218",
+      "input": {
+        "gross": "3081366.04",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "3081366.04",
+        "vat": "0.00",
+        "net": "3081366.04"
+      }
+    },
+    {
+      "id": "rev-219",
+      "input": {
+        "gross": "4062211.05",
+        "rateCode": "REDUCED",
+        "date": "2029-10-04",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "4062211.05",
+        "vat": "318237.73",
+        "net": "3743973.32"
+      }
+    },
+    {
+      "id": "rev-220",
+      "input": {
+        "gross": "-1830071.56",
+        "rateCode": "ZERO",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "-1830071.56",
+        "vat": "0.00",
+        "net": "-1830071.56"
+      }
+    },
+    {
+      "id": "rev-221",
+      "input": {
+        "gross": "471870.31",
+        "rateCode": "REDUCED",
+        "date": "2030-07-05",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "471870.31",
+        "vat": "36966.80",
+        "net": "434903.51"
+      }
+    },
+    {
+      "id": "rev-222",
+      "input": {
+        "gross": "4899671.47",
+        "rateCode": "STANDARD",
+        "date": "2028-09-09",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "4899671.47",
+        "vat": "747407.51",
+        "net": "4152263.96"
+      }
+    },
+    {
+      "id": "rev-223",
+      "input": {
+        "gross": "918960.20",
+        "rateCode": "STANDARD",
+        "date": "2031-06-19",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "918960.20",
+        "vat": "153160.03",
+        "net": "765800.17"
+      }
+    },
+    {
+      "id": "rev-224",
+      "input": {
+        "gross": "123238.22",
+        "rateCode": "EXEMPT",
+        "date": "2032-06-24",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "123238.22",
+        "vat": "0.00",
+        "net": "123238.22"
+      }
+    },
+    {
+      "id": "rev-225",
+      "input": {
+        "gross": "1938866.97",
+        "rateCode": "ZERO",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1938866.97",
+        "vat": "0.00",
+        "net": "1938866.97"
+      }
+    },
+    {
+      "id": "rev-226",
+      "input": {
+        "gross": "4128203.90",
+        "rateCode": "STANDARD",
+        "date": "2029-10-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "4128203.90",
+        "vat": "629726.02",
+        "net": "3498477.88"
+      }
+    },
+    {
+      "id": "rev-227",
+      "input": {
+        "gross": "1059151.18",
+        "rateCode": "ZERO",
+        "date": "2029-10-20",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1059151.18",
+        "vat": "0.00",
+        "net": "1059151.18"
+      }
+    },
+    {
+      "id": "rev-228",
+      "input": {
+        "gross": "2781615.55",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "2781615.55",
+        "vat": "0.00",
+        "net": "2781615.55"
+      }
+    },
+    {
+      "id": "rev-229",
+      "input": {
+        "gross": "4560394.57",
+        "rateCode": "ZERO",
+        "date": "2028-11-22",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "4560394.57",
+        "vat": "0.00",
+        "net": "4560394.57"
+      }
+    },
+    {
+      "id": "rev-230",
+      "input": {
+        "gross": "147764.59",
+        "rateCode": "ZERO",
+        "date": "2032-04-08",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "147764.59",
+        "vat": "0.00",
+        "net": "147764.59"
+      }
+    },
+    {
+      "id": "rev-231",
+      "input": {
+        "gross": "1024698.98",
+        "rateCode": "STANDARD",
+        "date": "2030-08-18",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "1024698.98",
+        "vat": "170783.16",
+        "net": "853915.82"
+      }
+    },
+    {
+      "id": "rev-232",
+      "input": {
+        "gross": "6086827.48",
+        "rateCode": "ZERO",
+        "date": "2032-06-07",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "6086827.48",
+        "vat": "0.00",
+        "net": "6086827.48"
+      }
+    },
+    {
+      "id": "rev-233",
+      "input": {
+        "gross": "-3220839.28",
+        "rateCode": "REDUCED",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "-3220839.28",
+        "vat": "-252323.81",
+        "net": "-2968515.47"
+      }
+    },
+    {
+      "id": "rev-234",
+      "input": {
+        "gross": "4285209.20",
+        "rateCode": "ZERO",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "4285209.20",
+        "vat": "0.00",
+        "net": "4285209.20"
+      }
+    },
+    {
+      "id": "rev-235",
+      "input": {
+        "gross": "274960.41",
+        "rateCode": "ZERO",
+        "date": "2029-11-21",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "274960.41",
+        "vat": "0.00",
+        "net": "274960.41"
+      }
+    },
+    {
+      "id": "rev-236",
+      "input": {
+        "gross": "26011.02",
+        "rateCode": "REDUCED",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "26011.02",
+        "vat": "2037.72",
+        "net": "23973.30"
+      }
+    },
+    {
+      "id": "rev-237",
+      "input": {
+        "gross": "2864401.87",
+        "rateCode": "REDUCED",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "2864401.87",
+        "vat": "224400.15",
+        "net": "2640001.72"
+      }
+    },
+    {
+      "id": "rev-238",
+      "input": {
+        "gross": "379661.10",
+        "rateCode": "REDUCED",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "379661.10",
+        "vat": "29743.04",
+        "net": "349918.06"
+      }
+    },
+    {
+      "id": "rev-239",
+      "input": {
+        "gross": "5687837.39",
+        "rateCode": "ZERO",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "5687837.39",
+        "vat": "0.00",
+        "net": "5687837.39"
+      }
+    },
+    {
+      "id": "rev-240",
+      "input": {
+        "gross": "6523611.86",
+        "rateCode": "STANDARD",
+        "date": "2031-01-22",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "6523611.86",
+        "vat": "1087268.64",
+        "net": "5436343.22"
+      }
+    },
+    {
+      "id": "rev-241",
+      "input": {
+        "gross": "714044.70",
+        "rateCode": "STANDARD",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "714044.70",
+        "vat": "108922.07",
+        "net": "605122.63"
+      }
+    },
+    {
+      "id": "rev-242",
+      "input": {
+        "gross": "-7687780.13",
+        "rateCode": "EXEMPT",
+        "date": "2032-02-13",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "-7687780.13",
+        "vat": "0.00",
+        "net": "-7687780.13"
+      }
+    },
+    {
+      "id": "rev-243",
+      "input": {
+        "gross": "813037.02",
+        "rateCode": "EXEMPT",
+        "date": "2032-04-14",
+        "rounding": {
+          "mode": "DOWN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "813037.02",
+        "vat": "0.00",
+        "net": "813037.02"
+      }
+    },
+    {
+      "id": "rev-244",
+      "input": {
+        "gross": "9152985.54",
+        "rateCode": "STANDARD",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "9152985.54",
+        "vat": "1525497.59",
+        "net": "7627487.95"
+      }
+    },
+    {
+      "id": "rev-245",
+      "input": {
+        "gross": "225596.06",
+        "rateCode": "EXEMPT",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "225596.06",
+        "vat": "0.00",
+        "net": "225596.06"
+      }
+    },
+    {
+      "id": "rev-246",
+      "input": {
+        "gross": "1370769.99",
+        "rateCode": "STANDARD",
+        "date": "2029-07-14",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "1370769.99",
+        "vat": "209100.51",
+        "net": "1161669.48"
+      }
+    },
+    {
+      "id": "rev-247",
+      "input": {
+        "gross": "1294232.09",
+        "rateCode": "REDUCED",
+        "date": "2032-06-23",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1294232.09",
+        "vat": "101391.45",
+        "net": "1192840.64"
+      }
+    },
+    {
+      "id": "rev-248",
+      "input": {
+        "gross": "9139623.34",
+        "rateCode": "ZERO",
+        "date": "2028-01-14",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "9139623.34",
+        "vat": "0.00",
+        "net": "9139623.34"
+      }
+    },
+    {
+      "id": "rev-249",
+      "input": {
+        "gross": "6065377.56",
+        "rateCode": "REDUCED",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "6065377.56",
+        "vat": "475167.83",
+        "net": "5590209.73"
+      }
+    },
+    {
+      "id": "rev-250",
+      "input": {
+        "gross": "8970.75",
+        "rateCode": "ZERO",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "8970.75",
+        "vat": "0.00",
+        "net": "8970.75"
+      }
+    },
+    {
+      "id": "rev-251",
+      "input": {
+        "gross": "9954780.38",
+        "rateCode": "REDUCED",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "9954780.38",
+        "vat": "779867.59",
+        "net": "9174912.79"
+      }
+    },
+    {
+      "id": "rev-252",
+      "input": {
+        "gross": "125696.70",
+        "rateCode": "ZERO",
+        "date": "2029-09-27",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "125696.70",
+        "vat": "0.00",
+        "net": "125696.70"
+      }
+    },
+    {
+      "id": "rev-253",
+      "input": {
+        "gross": "1847716.31",
+        "rateCode": "STANDARD",
+        "date": "2031-12-15",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "1847716.31",
+        "vat": "307952.72",
+        "net": "1539763.59"
+      }
+    },
+    {
+      "id": "rev-254",
+      "input": {
+        "gross": "-62343.94",
+        "rateCode": "STANDARD",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "-62343.94",
+        "vat": "-10390.66",
+        "net": "-51953.28"
+      }
+    },
+    {
+      "id": "rev-255",
+      "input": {
+        "gross": "900642.66",
+        "rateCode": "EXEMPT",
+        "date": "2031-07-31",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "900642.66",
+        "vat": "0.00",
+        "net": "900642.66"
+      }
+    },
+    {
+      "id": "rev-256",
+      "input": {
+        "gross": "648665.25",
+        "rateCode": "REDUCED",
+        "date": "2030-06-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "648665.25",
+        "vat": "50817.09",
+        "net": "597848.16"
+      }
+    },
+    {
+      "id": "rev-257",
+      "input": {
+        "gross": "6169835.54",
+        "rateCode": "STANDARD",
+        "date": "2030-04-20",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "6169835.54",
+        "vat": "941161.35",
+        "net": "5228674.19"
+      }
+    },
+    {
+      "id": "rev-258",
+      "input": {
+        "gross": "4395127.07",
+        "rateCode": "STANDARD",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "4395127.07",
+        "vat": "732521.18",
+        "net": "3662605.89"
+      }
+    },
+    {
+      "id": "rev-259",
+      "input": {
+        "gross": "1856549.95",
+        "rateCode": "EXEMPT",
+        "date": "2030-07-01",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "1856549.95",
+        "vat": "0.00",
+        "net": "1856549.95"
+      }
+    },
+    {
+      "id": "rev-260",
+      "input": {
+        "gross": "1690112.98",
+        "rateCode": "ZERO",
+        "date": "2032-05-17",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1690112.98",
+        "vat": "0.00",
+        "net": "1690112.98"
+      }
+    },
+    {
+      "id": "rev-261",
+      "input": {
+        "gross": "7710705.02",
+        "rateCode": "STANDARD",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "7710705.02",
+        "vat": "1176209.24",
+        "net": "6534495.78"
+      }
+    },
+    {
+      "id": "rev-262",
+      "input": {
+        "gross": "1137227.75",
+        "rateCode": "EXEMPT",
+        "date": "2031-10-12",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-exempt",
+        "treatment": "exempt",
+        "gross": "1137227.75",
+        "vat": "0.00",
+        "net": "1137227.75"
+      }
+    },
+    {
+      "id": "rev-263",
+      "input": {
+        "gross": "1861372.09",
+        "rateCode": "REDUCED",
+        "date": "2029-10-31",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "1861372.09",
+        "vat": "145821.78",
+        "net": "1715550.31"
+      }
+    },
+    {
+      "id": "rev-264",
+      "input": {
+        "gross": "1856836.06",
+        "rateCode": "ZERO",
+        "date": "2030-01-11",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "1856836.06",
+        "vat": "0.00",
+        "net": "1856836.06"
+      }
+    },
+    {
+      "id": "rev-265",
+      "input": {
+        "gross": "7542860.78",
+        "rateCode": "REDUCED",
+        "date": "2028-05-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-reduced",
+        "treatment": "taxable",
+        "gross": "7542860.78",
+        "vat": "590915.36",
+        "net": "6951945.42"
+      }
+    },
+    {
+      "id": "rev-266",
+      "input": {
+        "gross": "3048269.45",
+        "rateCode": "ZERO",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "3048269.45",
+        "vat": "0.00",
+        "net": "3048269.45"
+      }
+    },
+    {
+      "id": "rev-267",
+      "input": {
+        "gross": "8584870.22",
+        "rateCode": "ZERO",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "8584870.22",
+        "vat": "0.00",
+        "net": "8584870.22"
+      }
+    },
+    {
+      "id": "rev-268",
+      "input": {
+        "gross": "10977739.64",
+        "rateCode": "ZERO",
+        "date": "2029-09-16",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "10977739.64",
+        "vat": "0.00",
+        "net": "10977739.64"
+      }
+    },
+    {
+      "id": "rev-269",
+      "input": {
+        "gross": "775947.33",
+        "rateCode": "STANDARD",
+        "date": "2028-09-04",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-old",
+        "treatment": "taxable",
+        "gross": "775947.33",
+        "vat": "118364.85",
+        "net": "657582.48"
+      }
+    },
+    {
+      "id": "rev-270",
+      "input": {
+        "gross": "2818019.00",
+        "rateCode": "ZERO",
+        "date": "2030-06-29",
+        "rounding": {
+          "mode": "HALF_EVEN",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-zero",
+        "treatment": "zero_rated",
+        "gross": "2818019.00",
+        "vat": "0.00",
+        "net": "2818019.00"
+      }
+    },
+    {
+      "id": "rev-271",
+      "input": {
+        "gross": "2059737.89",
+        "rateCode": "STANDARD",
+        "date": "2032-09-30",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "2059737.89",
+        "vat": "343289.65",
+        "net": "1716448.24"
+      }
+    },
+    {
+      "id": "rev-272",
+      "input": {
+        "gross": "619203.83",
+        "rateCode": "STANDARD",
+        "date": "2030-07-02",
+        "rounding": {
+          "mode": "HALF_UP",
+          "scale": 2,
+          "level": "line"
+        }
+      },
+      "expected": {
+        "rateId": "vat-std-new",
+        "treatment": "taxable",
+        "gross": "619203.83",
+        "vat": "103200.64",
+        "net": "516003.19"
+      }
+    }
+  ]
+}

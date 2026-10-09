@@ -1,8 +1,5 @@
-# Rust artifacts — but NEVER ignore backend/Cargo.lock (audit A-19, must be COMMITted).
-target/
-sqlx-prepared.json
-.env
-!.env.example
+node_modules/
 dist/
+coverage/
+.env
 *.log
-.DS_Store

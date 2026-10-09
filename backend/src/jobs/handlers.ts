@@ -1,0 +1,18 @@
+import { fileExtractHandler } from './file-extract.js';
+import { sourceFetchHandler, sourcesHealthHandler, sourcesTickHandler } from './ingestion.js';
+import { chunksIndexHandler, embeddingsRunHandler } from './rag.js';
+import { invoiceParseHandler } from './invoice-parse.js';
+import { QUEUES, type JobHandler } from './types.js';
+
+/** Növbə adı → handler. Yeni fon işləri (B7+) bura əlavə olunur. */
+export function buildHandlers(): Record<string, JobHandler> {
+  return {
+    [QUEUES.FILE_EXTRACT]: fileExtractHandler,
+    [QUEUES.INVOICE_PARSE]: invoiceParseHandler,
+    [QUEUES.SOURCE_FETCH]: sourceFetchHandler,
+    [QUEUES.SOURCES_TICK]: sourcesTickHandler,
+    [QUEUES.SOURCES_HEALTH]: sourcesHealthHandler,
+    [QUEUES.CHUNKS_INDEX]: chunksIndexHandler,
+    [QUEUES.EMBEDDINGS_RUN]: embeddingsRunHandler,
+  };
+}
