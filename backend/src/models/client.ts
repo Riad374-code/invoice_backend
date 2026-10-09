@@ -53,12 +53,34 @@ const AccountSchema = z.object({
     .max(5)
     .default([]),
 });
+/** `POST /v1/classify/news`: kateqoriya, risk, teqlər, xülasə (+ aşkarlanmış vergi dərəcəsi dəyişikliyi). */
+const NewsSchema = z.object({
+  category: z.string().min(1).max(60),
+  riskLevel: z.enum(['low', 'medium', 'high']),
+  tags: z.array(z.string().min(1).max(50)).max(12).default([]),
+  summary: z.string().min(1).max(2000),
+  rateChange: z
+    .object({
+      taxType: z.enum(['VAT', 'PROFIT', 'INCOME', 'WITHHOLDING', 'SIMPLIFIED', 'SOCIAL']),
+      code: z.string().min(1).max(60),
+      ratePercent: z.string().regex(/^\d+(\.\d{1,4})?$/),
+      validFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      confidence: Conf,
+    })
+    .nullable()
+    .default(null),
+  model: z.string().min(1),
+});
+export type NewsClassification = z.infer<typeof NewsSchema>;
 export type OcrResult = z.infer<typeof OcrSchema>;
 export type AccountSuggestion = z.infer<typeof AccountSchema>;
 
 export interface ModelServing {
   ocr(file: Buffer, mime: string): Promise<OcrResult>;
   extractInvoice(text: string): Promise<ExtractedInvoice>;
+  classifyNews(text: string): Promise<NewsClassification>;
+  /** `GET /v1/models`: model-serving-də aktiv versiyalar */
+  listModels?(): Promise<Array<{ id: string }>>;
   classifyAccount(req: {
     description: string;
     direction: 'sales' | 'purchase';
@@ -109,6 +131,27 @@ export class HttpModelServing implements ModelServing {
   }
   extractInvoice(text: string) {
     return this.post('/v1/extract/invoice', { text }, ExtractedInvoiceSchema);
+  }
+  async listModels() {
+    let res: Response;
+    try {
+      res = await (this.o.fetchImpl ?? fetch)(new URL('/v1/models', this.o.baseUrl), {
+        headers: this.o.apiKey ? { authorization: `Bearer ${this.o.apiKey}` } : {},
+        signal: AbortSignal.timeout(10_000),
+      });
+    } catch (e) {
+      throw new UpstreamError(`model-serving unreachable: ${(e as Error).message}`, { cause: e });
+    }
+    if (!res.ok) throw new UpstreamError(`model-serving /v1/models returned HTTP ${res.status}`);
+    const parsed = z
+      .object({ data: z.array(z.object({ id: z.string() })) })
+      .safeParse(await res.json().catch(() => null));
+    if (!parsed.success)
+      throw new ModelResponseError('model-serving /v1/models response does not match the contract');
+    return parsed.data.data;
+  }
+  classifyNews(text: string) {
+    return this.post('/v1/classify/news', { text: text.slice(0, 20_000) }, NewsSchema);
   }
   classifyAccount(req: Parameters<ModelServing['classifyAccount']>[0]) {
     return this.post('/v1/classify/account', req, AccountSchema);

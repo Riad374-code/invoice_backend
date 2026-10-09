@@ -77,4 +77,8 @@ Addım fayllarının §1 hissəsi orijinal (Rust) mətni saxlayır. İcra zaman�
 | B8 | ✅ | chunks (HNSW+GIN, az_normalize), chunker, embedding/rerank klientləri, hybrid search+RRF, tarix/tenant/icazə filtri, sitat doğrulaması, POST /search |
 | B9 | ✅ | LLM klienti (stream+tools), Tool Gateway (7 addım), 17 alət reyestri (11 aktiv), orkestrator (sitat/grounding/limitlər), SSE, təsdiq → icra, feedback |
 | B10 | ✅ | mətnli PDF (unpdf) + OCR, extract_invoice müqaviləsi (zod), sahə etibarlılığı < 0.85 → needs_review, account_suggestion (account_final boş), mhbs.classify, insan düzəlişi → feedback |
-| B11–B15 | ⏳ | |
+| B11 | ✅ | jurnal (DB trigger: balans + dəyişməzlik), təklif → təsdiq → post, ƏDV dövr yekunu/qaralama CSV, depozit idxalı, hesablar planı, CBAR job. Vergi təqvimi xatırlatması B13-də (bildirişlər) |
+| B12 | ✅ | exceljs (profile/clean/reconcile/report → yeni fayl), reconciliations (+confirm), import preview→təsdiq→commit (1C cədvəl, e-taxes XML, bank), bank_transactions, 1C ixracı; CSV dəyərləri toxunulmaz |
+| B13 | ✅ | news.enrich (classify/summarize, raw_text ayrı), impact.analyze (şirkət-izolyasiyalı), impact_findings, bildirişlər (polling), vergi dərəcəsi təklifi → platforma təsdiqi → aktivləşmə. Qeyd: platforma şirkəti (`companies.is_platform`) production-da əl ilə təyin olunur |
+| B14 | ✅ | admin console (users/roles/sources/tax-rates/models), feedback export, approvals expiry |
+| B15 | ✅ | `backend/load/k6-smoke.js`, `backend/SECURITY.md` (release checklist + known gaps) |

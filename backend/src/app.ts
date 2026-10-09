@@ -24,6 +24,9 @@ import fileRoutes from './routes/files.js';
 import invoiceRoutes from './routes/invoices.js';
 import knowledgeRoutes from './routes/knowledge.js';
 import searchRoutes from './routes/search.js';
+import adminConsoleRoutes from './routes/admin-console.js';
+import excelRoutes from './routes/excel.js';
+import impactRoutes from './routes/impact.js';
 import ledgerRoutes from './routes/ledger.js';
 import vatRoutes from './routes/vat.js';
 import taxRateRoutes from './routes/tax-rates.js';
@@ -32,6 +35,7 @@ import { registerBuiltinTools } from './agent/builtin-tools.js';
 import { ToolGateway } from './agent/gateway.js';
 import { ToolRegistry } from './agent/tools.js';
 import assistantRoutes from './routes/assistant.js';
+import type { RagOcrClient } from './ragocr/client.js';
 import type { ModelServing } from './models/client.js';
 import type { LlmClient } from './llm/client.js';
 import type { Embedder, Reranker } from './rag/clients.js';
@@ -58,6 +62,7 @@ export interface BuildAppOptions {
   reranker?: Reranker | undefined;
   llm?: LlmClient | undefined;
   models?: ModelServing | undefined;
+  ragOcr?: RagOcrClient | undefined;
   /** Test üçün: sabit saatlı limiter vermək olar. */
   rateLimiter?: FixedWindowRateLimiter;
 }
@@ -71,6 +76,7 @@ export async function buildApp({
   reranker,
   llm,
   models,
+  ragOcr,
   rateLimiter,
 }: BuildAppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -118,6 +124,7 @@ export async function buildApp({
     reranker,
     llm,
     models,
+    ragOcr,
     tools,
     gateway: new ToolGateway(tools),
   };
@@ -167,6 +174,9 @@ export async function buildApp({
   await app.register(assistantRoutes);
   await app.register(vatRoutes);
   await app.register(ledgerRoutes);
+  await app.register(excelRoutes);
+  await app.register(impactRoutes);
+  await app.register(adminConsoleRoutes);
 
   // Sxem yalnız istehsaldan kənarda HTTP ilə verilir; CLI (`npm run openapi`) həmişə işləyir.
   if (config.appEnv !== 'production') {

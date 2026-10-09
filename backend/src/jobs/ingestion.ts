@@ -1,4 +1,5 @@
 import { Cron } from 'croner';
+import { cbarUrl, parseCbarXml } from '../ingestion/cbar.js';
 import { runSourceFetch } from '../ingestion/pipeline.js';
 import { PermanentJobError, QUEUES, type JobHandler } from './types.js';
 
@@ -72,4 +73,19 @@ export const sourcesHealthHandler: JobHandler = async (_job, deps) => {
     }
   }
   return { opened };
+};
+
+/** Gündəlik CBAR məzənnələri (bugün; payload.date ilə konkret gün). Xəta işi təkrar cəhd edir (geri çəkilmə). */
+export const fxCbarHandler: JobHandler = async (job, deps) => {
+  if (!deps.fetcher) throw new PermanentJobError('No page fetcher configured');
+  const date =
+    (job.payload as { date?: string } | null)?.date ?? new Date().toISOString().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new PermanentJobError('invalid date');
+  const res = await deps.fetcher.get(cbarUrl(date));
+  if (res.status !== 200) throw new Error(`CBAR returned HTTP ${res.status}`);
+  const parsed = parseCbarXml(res.body);
+  if (parsed.date !== date)
+    throw new Error(`CBAR returned rates for ${parsed.date}, expected ${date}`);
+  const n = await deps.repos.vat.upsertFx(parsed.rates.map((r) => ({ ...r, date })));
+  return { date, currencies: n };
 };

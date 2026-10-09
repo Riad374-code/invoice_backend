@@ -60,6 +60,17 @@ export const chunksIndexHandler: JobHandler = async (job, deps) => {
     queue: QUEUES.EMBEDDINGS_RUN,
     idempotencyKey: `embed-after:${job.id}`,
   });
+  if (p.resourceType === 'news' || p.resourceType === 'legislation') {
+    const kind = p.resourceType === 'news' ? 'news' : 'legislation_version';
+    const sourceId = p.resourceType === 'news' ? p.resourceId : versionId!;
+    // Təsir analizi embedding-lər hazır olandan sonra işləyir (hazır deyilsə iş geri çəkilmə ilə təkrar olunur)
+    await repos.jobs.enqueue({
+      queue: QUEUES.IMPACT_ANALYZE,
+      payload: { sourceKind: kind, sourceId },
+      maxAttempts: 10,
+      idempotencyKey: `impact:${kind}:${sourceId}`,
+    });
+  }
   return { chunks: count };
 };
 

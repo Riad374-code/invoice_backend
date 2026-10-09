@@ -106,6 +106,15 @@ async function ingestNews(deps: PipelineDeps, source: SourceRow, stats: FetchSta
           },
           now,
         );
+        await deps.repos.jobs.enqueue(
+          {
+            queue: QUEUES.NEWS_ENRICH,
+            payload: { newsId },
+            maxAttempts: 6,
+            idempotencyKey: `enrich:${newsId}`,
+          },
+          now,
+        );
       }
     } catch (e) {
       stats.errors.push(`${item.url}: ${(e as Error).message}`);

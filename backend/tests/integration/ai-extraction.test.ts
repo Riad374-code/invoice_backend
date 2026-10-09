@@ -237,6 +237,9 @@ class FakeModels implements ModelServing {
     if (this.badContract) throw new ModelResponseError('bad contract');
     return structuredClone(this.extracted);
   }
+  async classifyNews(): Promise<never> {
+    throw new Error('not used');
+  }
   async classifyAccount(req: { description: string }) {
     const a = this.account.get(req.description) ?? { code: '731', confidence: 0.92 };
     return { accountCode: a.code, confidence: a.confidence, model: 'classify-2', alternatives: [] };

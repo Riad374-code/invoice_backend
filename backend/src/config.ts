@@ -35,8 +35,11 @@ export interface AppConfig {
   ragMinSimilarity: number;
   /** Hər istifadəçi üçün dəqiqədə maksimum assistent mesajı. */
   chatRateLimitPerMinute: number;
+  /** Təsir analizi: fayl parçası ilə minimum cosine oxşarlığı (embedding modelinə görə kalibrləməlidir). */
+  impactMinSimilarity: number;
   /** AI çıxarışında bu etibarlılıqdan aşağı sahələr insan yoxlaması tələb edir (BACKEND.md §7). */
   extractionReviewThreshold: number;
+  ragOcr: { baseUrl: string; token: string } | undefined;
   models: { apiKey: string | undefined; embedding: string; rerank: string; chat: string };
   /** §11: fayl yükləmə ölçü limiti (bayt). */
   maxUploadBytes: number;
@@ -45,6 +48,8 @@ export interface AppConfig {
   jobs: { enabled: boolean; pollIntervalMs: number };
   otlpEndpoint: string | undefined;
   prometheusListenAddr: string | undefined;
+  /** SEED_DEMO_DATA=true (+ DEMO_PASSWORD ≥12 simvol): ayrı DEMO şirkəti və nümunə məlumat; istənilən mühitdə. */
+  demoSeed: { password: string } | undefined;
   /** Yalnız development: ilk admin istifadəçi/şirkət (DEV_ADMIN_EMAIL + DEV_ADMIN_PASSWORD verilərsə). */
   devSeed: { email: string; password: string; companyName: string; voen: string } | undefined;
 }
@@ -94,10 +99,13 @@ const schema = z.object({
   S3_SECRET_KEY: optionalString,
   MODEL_SERVING_BASE_URL: optionalString,
   MODEL_SERVING_API_KEY: optionalString,
+  RAG_OCR_BASE_URL: optionalString,
+  RAG_OCR_TOKEN: optionalString,
   EMBEDDING_MODEL: z.string().default('bge-m3'),
   RERANK_MODEL: z.string().default('bge-reranker-v2-m3'),
   CHAT_MODEL: z.string().default('lexaudit-chat'),
   CHAT_RATE_LIMIT_PER_MINUTE: intFromEnv(20),
+  IMPACT_MIN_SIMILARITY: z.coerce.number().min(0).max(1).default(0.6),
   EXTRACTION_REVIEW_THRESHOLD: z.coerce.number().min(0).max(1).default(0.85),
   RAG_MIN_SIMILARITY: z.coerce.number().min(0).max(1).default(0.35),
   MAX_UPLOAD_BYTES: intFromEnv(20 * 1024 * 1024),
@@ -108,6 +116,11 @@ const schema = z.object({
   JOBS_POLL_INTERVAL_MS: intFromEnv(1000, 50),
   OTEL_EXPORTER_OTLP_ENDPOINT: optionalString,
   PROMETHEUS_LISTEN_ADDR: optionalString,
+  SEED_DEMO_DATA: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  DEMO_PASSWORD: optionalString,
   DEV_ADMIN_EMAIL: optionalString,
   DEV_ADMIN_PASSWORD: optionalString,
 });
@@ -162,6 +175,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     }
   }
 
+  if (e.SEED_DEMO_DATA && (e.DEMO_PASSWORD?.length ?? 0) < 12)
+    issues.push(
+      'SEED_DEMO_DATA=true requires DEMO_PASSWORD of at least 12 characters (no default password)',
+    );
   if (isProd && !e.DATABASE_URL) issues.push('DATABASE_URL is required in production');
 
   if (isProd) {
@@ -211,8 +228,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       secretKey: e.S3_SECRET_KEY,
     },
     modelServingBaseUrl: e.MODEL_SERVING_BASE_URL,
+    ragOcr:
+      e.RAG_OCR_BASE_URL && e.RAG_OCR_TOKEN
+        ? { baseUrl: e.RAG_OCR_BASE_URL, token: e.RAG_OCR_TOKEN }
+        : undefined,
     ragMinSimilarity: e.RAG_MIN_SIMILARITY,
     chatRateLimitPerMinute: e.CHAT_RATE_LIMIT_PER_MINUTE,
+    impactMinSimilarity: e.IMPACT_MIN_SIMILARITY,
     extractionReviewThreshold: e.EXTRACTION_REVIEW_THRESHOLD,
     models: {
       apiKey: e.MODEL_SERVING_API_KEY,
@@ -228,6 +250,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     jobs: { enabled: e.JOBS_ENABLED, pollIntervalMs: e.JOBS_POLL_INTERVAL_MS },
     otlpEndpoint: e.OTEL_EXPORTER_OTLP_ENDPOINT,
     prometheusListenAddr: e.PROMETHEUS_LISTEN_ADDR,
+    demoSeed: e.SEED_DEMO_DATA && e.DEMO_PASSWORD ? { password: e.DEMO_PASSWORD } : undefined,
     devSeed:
       e.DEV_ADMIN_EMAIL && e.DEV_ADMIN_PASSWORD
         ? {

@@ -136,44 +136,14 @@ def make_search_text(fields):
     return "\n".join(str(p) for p in parts if p)
 
 
-def ingest_receipt(file_path, company_id):
-    source = Path(file_path).resolve()
-
-    if not source.is_file():
-        raise FileNotFoundError(source)
-
-    if source.suffix.lower() not in SUPPORTED:
-        raise ValueError("Unsupported document format")
-
-    if source.stat().st_size > 15 * 1024 * 1024:
-        raise ValueError("File exceeds demo size limit")
-
-    folder = company_folder(company_id, create=True)
-    file_bytes = source.read_bytes()
-
-    sha256 = hashlib.sha256(file_bytes).hexdigest()
-
-    # Avoid indexing the same file twice.
-    for existing in folder.glob("*.json"):
-        record = json.loads(existing.read_text(encoding="utf-8"))
-
-        if record.get("company_id") == company_id and record["sha256"] == sha256:
-            print("Document already indexed:", record["document_id"])
-            return reviewed_record(record)
-
+def extract_receipt_fields(file_bytes, mime):
+    """Gemini Vision OCR + structured extraction. Stores nothing."""
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not api_key:
         raise RuntimeError("Missing GEMINI_API_KEY")
 
-    mime = mimetypes.guess_type(source.name)[0]
-
-    if not mime:
-        raise ValueError("Unknown file MIME type")
-
     client = genai.Client(api_key=api_key)
-
-    print("Extracting receipt information...")
 
     response = client.models.generate_content(
         model=GEMINI_MODEL,
@@ -202,6 +172,41 @@ def ingest_receipt(file_path, company_id):
         quote = item.get('source_quote')
         if not quote or quote not in fields['raw_text']:
             raise ValueError('Line item quote is missing or does not occur in extracted text')
+    return fields
+
+
+def ingest_receipt(file_path, company_id):
+    source = Path(file_path).resolve()
+
+    if not source.is_file():
+        raise FileNotFoundError(source)
+
+    if source.suffix.lower() not in SUPPORTED:
+        raise ValueError("Unsupported document format")
+
+    if source.stat().st_size > 15 * 1024 * 1024:
+        raise ValueError("File exceeds demo size limit")
+
+    folder = company_folder(company_id, create=True)
+    file_bytes = source.read_bytes()
+
+    sha256 = hashlib.sha256(file_bytes).hexdigest()
+
+    # Avoid indexing the same file twice.
+    for existing in folder.glob("*.json"):
+        record = json.loads(existing.read_text(encoding="utf-8"))
+
+        if record.get("company_id") == company_id and record["sha256"] == sha256:
+            print("Document already indexed:", record["document_id"])
+            return reviewed_record(record)
+
+    mime = mimetypes.guess_type(source.name)[0]
+
+    if not mime:
+        raise ValueError("Unknown file MIME type")
+
+    print("Extracting receipt information...")
+    fields = extract_receipt_fields(file_bytes, mime)
 
     document_id = str(uuid.uuid4())
 

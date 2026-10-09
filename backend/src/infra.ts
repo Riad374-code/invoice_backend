@@ -2,6 +2,7 @@ import type { AppConfig } from './config.js';
 import { ClamAvScanner, NoopScanner, type AntivirusScanner } from './security/antivirus.js';
 import { MemoryStorage, S3Storage, type ObjectStorage } from './storage/index.js';
 
+import { HttpRagOcr, withRagOcr, type RagOcrClient } from './ragocr/client.js';
 import { HttpModelServing, type ModelServing } from './models/client.js';
 import { HttpLlmClient, type LlmClient } from './llm/client.js';
 import { HttpEmbedder, HttpReranker, type Embedder, type Reranker } from './rag/clients.js';
@@ -11,6 +12,7 @@ export interface Infra {
   reranker?: Reranker;
   llm?: LlmClient;
   models?: ModelServing;
+  ragOcr?: RagOcrClient;
   storage: ObjectStorage;
   scanner: AntivirusScanner;
   warnings: string[];
@@ -65,6 +67,10 @@ export async function createInfra(config: AppConfig): Promise<Infra> {
     warnings.push(
       'MODEL_SERVING_BASE_URL is not set — embeddings/rerank disabled; search falls back to full-text only.',
     );
+  }
+  if (config.ragOcr) {
+    infra.ragOcr = new HttpRagOcr(config.ragOcr);
+    infra.models = withRagOcr(infra.models, infra.ragOcr);
   }
   return infra;
 }

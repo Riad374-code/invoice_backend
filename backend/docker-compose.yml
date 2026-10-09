@@ -28,6 +28,13 @@ services:
       # Antivirus: `docker compose --profile av up` + CLAMAV_HOST=clamav (dev-də boş = söndürülüb)
       CLAMAV_HOST: ${CLAMAV_HOST:-}
       MODEL_SERVING_BASE_URL: http://model-serving:8001
+      # Demo məlumat: ayrı "Demo MMC" şirkəti (admin|accountant|approver|viewer@demo.lexaudit.local).
+      # Defolt parol YALNIZ lokal dev üçündür; ictimai deploy-da .env ilə mütləq dəyişin.
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-Demo-Passw0rd-2026}
+      # Python RAG/OCR sidecar (modules/lexaudit_rag/service.py); ikisi də verilməsə söndürülüb
+      RAG_OCR_BASE_URL: ${RAG_OCR_BASE_URL:-}
+      RAG_OCR_TOKEN: ${RAG_OCR_TOKEN:-}
     ports:
       - '8080:8080'
 

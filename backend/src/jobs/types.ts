@@ -13,6 +13,12 @@ export const QUEUES = {
   SOURCES_TICK: 'sources.tick',
   SOURCES_HEALTH: 'sources.health',
   CHUNKS_INDEX: 'chunks.index',
+  FX_CBAR: 'fx.cbar',
+  EXCEL_RUN: 'excel.run',
+  NEWS_ENRICH: 'news.enrich',
+  FEEDBACK_EXPORT: 'feedback.export',
+  APPROVALS_EXPIRE: 'approvals.expire',
+  IMPACT_ANALYZE: 'impact.analyze',
   EMBEDDINGS_RUN: 'embeddings.run',
 } as const;
 
@@ -32,6 +38,7 @@ export interface JobDeps {
   embedder?: Embedder;
   models?: ModelServing;
   reviewThreshold?: number;
+  impactMinSimilarity?: number;
   log: JobLogger;
 }
 

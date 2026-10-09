@@ -13,6 +13,8 @@ import {
 } from '../domain/index.js';
 import { ApiError, errorResponses } from '../error.js';
 import { requireAuth } from '../plugins/auth.js';
+import { DomainError } from '../domain/index.js';
+import { commitImport } from '../imports/service.js';
 import { PostingError, postEntry } from '../ledger/service.js';
 import { executeApprovedToolRun } from '../agent/gateway.js';
 import { SourceAccumulator } from '../agent/tools.js';
@@ -140,6 +142,27 @@ export default async function approvalRoutes(app: FastifyInstance) {
             await repos.ledger.setApproval(auth.companyId, entryId, null); // yenidən təsdiqə göndərilə bilər
           }
         }
+        if (decided.kind === 'tax_rate_proposal') {
+          const rateId = (decided.payload as { taxRateId?: string } | null)?.taxRateId;
+          if (!rateId) throw ApiError.internal('Approval payload has no taxRateId');
+          if (decided.status === 'approved')
+            await repos.impact.activateRate(rateId); // EXCLUDE constraint üst-üstə düşməni rədd edir (→ 409)
+          else await repos.impact.deleteProposedRate(rateId);
+        }
+        if (decided.kind === 'import_commit') {
+          const importId = (decided.payload as { importId?: string } | null)?.importId;
+          if (!importId) throw ApiError.internal('Approval payload has no importId');
+          if (decided.status === 'approved') {
+            try {
+              await commitImport(repos, auth.companyId, importId, auth.userId);
+            } catch (e) {
+              if (e instanceof DomainError) throw ApiError.conflict(e.message);
+              throw e;
+            }
+          } else {
+            await repos.excel.setImport(importId, { clearApproval: true });
+          }
+        }
         await auditRequest(
           app,
           request,
@@ -171,6 +194,8 @@ export default async function approvalRoutes(app: FastifyInstance) {
               db: app.ctx.db,
               sources: new SourceAccumulator(),
               models: app.ctx.models,
+              ragOcr: app.ctx.ragOcr,
+              storage: app.ctx.storage,
               now: new Date(),
               search: (req) =>
                 hybridSearch(

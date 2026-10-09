@@ -28,7 +28,7 @@ const IO_MODULES = [
 ];
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'coverage'] },
+  { ignores: ['dist', 'node_modules', 'coverage', 'load'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

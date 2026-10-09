@@ -4,6 +4,8 @@ import type { ChatMessage, LlmClient, ToolCall } from '../llm/client.js';
 import { NO_SOURCE_MESSAGE, resolveCitations } from '../rag/citations.js';
 import { UpstreamError } from '../rag/clients.js';
 import { hybridSearch } from '../rag/search.js';
+import type { ObjectStorage } from '../storage/index.js';
+import type { RagOcrClient } from '../ragocr/client.js';
 import type { ModelServing } from '../models/client.js';
 import type { Embedder, Reranker } from '../rag/clients.js';
 import type { ToolGateway, GatewayOutcome } from './gateway.js';
@@ -63,6 +65,8 @@ export interface AgentDeps {
   embedder?: Embedder | undefined;
   reranker?: Reranker | undefined;
   models?: ModelServing | undefined;
+  storage?: ObjectStorage | undefined;
+  ragOcr?: RagOcrClient | undefined;
   limits?: Partial<AgentLimits>;
   now?: () => Date;
   log?: { warn(o: object, m: string): void };
@@ -135,6 +139,9 @@ export async function runTurn(deps: AgentDeps, input: TurnInput): Promise<void> 
     conversationId: input.conversationId,
     repos,
     db: deps.db,
+    models: deps.models,
+    storage: deps.storage,
+    ragOcr: deps.ragOcr,
     sources,
     now: now(),
     // company_id burada SABİTLƏNİR: alətlər onu parametr kimi görmür

@@ -255,7 +255,7 @@ export async function executeApprovedToolRun(
       >,
     ) => ToolContext;
   },
-  approval: { id: string; companyId: string; requesterId: string },
+  approval: { id: string; companyId: string; requesterId: string; approverId?: string | null },
   requestId: string,
 ): Promise<{ status: 'succeeded' | 'failed' | 'skipped'; message: string }> {
   const run = await deps.repos.assistant.findRunByApproval(approval.id);
@@ -290,7 +290,10 @@ export async function executeApprovedToolRun(
       conversationId: run.conversationId,
       requestId,
     });
-    const result = await tool.handler(ctx, args.data);
+    const result = await tool.handler(
+      { ...ctx, approvedBy: approval.approverId ?? undefined },
+      args.data,
+    );
     const summary = json(result).slice(0, 300);
     await deps.repos.assistant.finishToolRun(run.id, {
       status: 'succeeded',

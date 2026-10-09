@@ -6,6 +6,7 @@ import type { FixedWindowRateLimiter } from './plugins/rate-limit.js';
 import type { AntivirusScanner } from './security/antivirus.js';
 import type { ToolGateway } from './agent/gateway.js';
 import type { ToolRegistry } from './agent/tools.js';
+import type { RagOcrClient } from './ragocr/client.js';
 import type { ModelServing } from './models/client.js';
 import type { LlmClient } from './llm/client.js';
 import type { Embedder, Reranker } from './rag/clients.js';
@@ -31,6 +32,7 @@ export interface AppContext {
   embedder?: Embedder | undefined;
   llm?: LlmClient | undefined;
   models?: ModelServing | undefined;
+  ragOcr?: RagOcrClient | undefined;
   tools: ToolRegistry;
   gateway: ToolGateway;
   reranker?: Reranker | undefined;

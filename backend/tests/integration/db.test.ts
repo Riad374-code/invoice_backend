@@ -74,12 +74,16 @@ describe('migrations', () => {
       '0008_assistant.sql',
       '0009_extraction.sql',
       '0010_message_order.sql',
+      '0011_vat_ledger.sql',
+      '0012_excel_recon_import.sql',
+      '0013_impact.sql',
+      '0014_feedback_models_admin.sql',
     ]);
     const second = await migrate(fresh);
     expect(second.applied).toEqual([]);
-    expect(second.skipped).toHaveLength(10);
+    expect(second.skipped).toHaveLength(14);
     const [row] = await fresh.query<{ n: number }>('SELECT count(*)::int AS n FROM permissions');
-    expect(row?.n).toBe(19);
+    expect(row?.n).toBe(24);
     await fresh.close();
   });
 
@@ -243,6 +247,7 @@ describe('repositories', () => {
     expect(perms).toEqual([
       'assistant:use',
       'files:read',
+      'impact:read',
       'invoices:read',
       'journal:read',
       'legislation:read',

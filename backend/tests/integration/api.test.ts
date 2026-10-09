@@ -359,7 +359,7 @@ describe('login / me / logout', () => {
       roles: ['admin'],
     });
     expect(me.permissions).toContain('approvals:decide');
-    expect(me.permissions).toHaveLength(19);
+    expect(me.permissions).toHaveLength(24);
   });
 
   it('access token carries the configured lifetime (A-07)', async () => {
@@ -574,7 +574,7 @@ describe('approvals (A-03, A-04, tenant isolation)', () => {
     return env.repos.approvals.create(
       newApproval({
         companyId,
-        kind: 'journal_post',
+        kind: 'generic_review',
         resourceRef: `journal:${randomUUID()}`,
         payload: { amount: '100.00' },
         requesterId,

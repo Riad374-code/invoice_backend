@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { buildApp } from './app.js';
+import { seedDemoData } from './demo-data.js';
 import { seedDevAdmin, seedDevTaxRates } from './bootstrap.js';
 import { ExtractorRegistry } from './documents/index.js';
 import { registerModelExtractors } from './documents/model-extractors.js';
@@ -53,6 +54,13 @@ try {
     const { created } = await seedDevAdmin(db, config.devSeed);
     if (created) console.info(`dev admin created: ${config.devSeed.email}`);
   }
+  if (config.demoSeed) {
+    const r = await seedDemoData(db, config.demoSeed);
+    if (r.created)
+      console.info('demo company + sample data created (login: admin@demo.lexaudit.local)');
+    if (r.ratesCreated)
+      console.info(`sample VAT rates created (no legal source): ${r.ratesCreated}`);
+  }
 } catch (err) {
   console.error('Startup failed:', err);
   process.exit(1);
@@ -74,6 +82,9 @@ const app = await buildApp({
   scanner: infra.scanner,
   embedder: infra.embedder,
   reranker: infra.reranker,
+  llm: infra.llm,
+  models: infra.models,
+  ragOcr: infra.ragOcr,
 });
 
 // Fon işləri (Postgres SKIP LOCKED növbəsi). Ayrıca prosesdə işlətmək üçün JOBS_ENABLED=false.
@@ -89,6 +100,7 @@ const worker = config.jobs.enabled
         embedder: infra.embedder,
         models: infra.models,
         reviewThreshold: config.extractionReviewThreshold,
+        impactMinSimilarity: config.impactMinSimilarity,
         fetcher: new SafeFetcher({
           userAgent: 'LexAuditBot/1.0 (+contact: admin; respects robots.txt)',
         }),
@@ -146,6 +158,13 @@ const scheduler = config.jobs.enabled
   : undefined;
 if (scheduler) {
   scheduler.add({ name: 'sources-tick', pattern: '* * * * *', queue: QUEUES.SOURCES_TICK });
+  scheduler.add({ name: 'feedback-export', pattern: '0 3 * * 1', queue: QUEUES.FEEDBACK_EXPORT });
+  scheduler.add({
+    name: 'approvals-expire',
+    pattern: '10 * * * *',
+    queue: QUEUES.APPROVALS_EXPIRE,
+  });
+  scheduler.add({ name: 'fx-cbar', pattern: '30 7 * * *', queue: QUEUES.FX_CBAR });
   scheduler.add({ name: 'embeddings-tick', pattern: '*/5 * * * *', queue: QUEUES.EMBEDDINGS_RUN });
   scheduler.add({ name: 'sources-health', pattern: '7 * * * *', queue: QUEUES.SOURCES_HEALTH });
   scheduler.start();

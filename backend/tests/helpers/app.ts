@@ -128,6 +128,7 @@ export async function createTestEnv(
       embedder: opts.embedder,
       models: opts.models,
       reviewThreshold: config.extractionReviewThreshold,
+      impactMinSimilarity: config.impactMinSimilarity,
       log: { info: () => undefined, warn: () => undefined, error: () => undefined },
     },
     handlers: buildHandlers(),

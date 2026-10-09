@@ -15,6 +15,15 @@ import {
 import { PERMISSIONS } from '../domain/index.js';
 import { diffText } from '../ingestion/diff.js';
 import { validateInvoice } from '../invoices/service.js';
+import { createRepos } from '../db/index.js';
+import { postEntry } from '../ledger/service.js';
+import { PERIOD_RE, computePeriodSummary } from '../vat/summary.js';
+import { summaryJson } from '../routes/vat.js';
+import { profileTable } from '../documents/excel-ops.js';
+import { previewImport, commitImport } from '../imports/service.js';
+import { runExcelJob } from '../jobs/excel.js';
+import { exportEntries1c } from '../routes/excel.js';
+import { loadTable, refJson, runReconciliation, type SourceSpec } from '../recon/service.js';
 import { defineTool, ToolRegistry, type ToolContext } from './tools.js';
 
 const MAX_TEXT = 12_000;
@@ -32,6 +41,26 @@ const Day = z.string().refine((d) => {
   }
 }, 'must be YYYY-MM-DD');
 const Uuid = z.uuid();
+const ReconSource = z.discriminatedUnion('type', [
+  z
+    .object({
+      type: z.literal('file'),
+      fileId: Uuid,
+      keyColumn: z.string().min(1),
+      amountColumn: z.string().min(1),
+      dateColumn: z.string().min(1).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal('invoices'),
+      from: Day,
+      to: Day,
+      direction: z.enum(['sales', 'purchase']).optional(),
+    })
+    .strict(),
+  z.object({ type: z.literal('bank'), from: Day.optional(), to: Day.optional() }).strict(),
+]);
 const RateCode = z.string().min(1).max(60);
 const today = (ctx: ToolContext) => ctx.now.toISOString().slice(0, 10);
 
@@ -211,6 +240,141 @@ export function registerBuiltinTools(registry: ToolRegistry): void {
         return ex.status === 'ready' && ex.text
           ? { name: file.name, text: clip(ex.text) }
           : { name: file.name, status: ex.status, error: ex.error };
+      },
+    }),
+  );
+  // ------------------------------------------------ RAG/OCR sidecar alətləri
+  const needRag = (ctx: ToolContext) => {
+    if (!ctx.ragOcr) throw new Error('RAG/OCR service is not configured (RAG_OCR_BASE_URL)');
+    return ctx.ragOcr;
+  };
+  registry.register(
+    defineTool({
+      name: 'regulations.search',
+      risk: 'read',
+      permission: PERMISSIONS.LEGISLATION_READ,
+      available: true,
+      description:
+        'Search the Azerbaijani Tax Code index (hybrid semantic+lexical). Returns passages labelled [S#] to cite. validityVerified=false means the effective dates are not legally certified.',
+      args: z
+        .object({
+          query: z.string().min(2).max(500),
+          limit: z.number().int().min(1).max(8).default(5),
+        })
+        .strict(),
+      handler: async (ctx, a) => {
+        const rows = await needRag(ctx).searchRegulations(a.query, a.limit);
+        if (rows.length === 0)
+          return { results: [], note: 'No source found in the Tax Code index for this query.' };
+        return {
+          results: rows.map((r) => {
+            const src = ctx.sources.add({
+              id: r.id,
+              text: r.text,
+              sourceTitle: 'Vergi Məcəlləsi',
+              articleRef: `maddə ${r.article} — ${r.title}`,
+              versionNo: null,
+            });
+            return {
+              label: src.label,
+              article: r.article,
+              title: r.title,
+              url: r.source_url ?? null,
+              effectiveFrom: r.effective_from ?? null,
+              validityVerified: r.validity_verified ?? false,
+              text: clip(r.text),
+            };
+          }),
+        };
+      },
+    }),
+  );
+  registry.register(
+    defineTool({
+      name: 'receipts.search',
+      risk: 'read',
+      permission: PERMISSIONS.FILES_READ,
+      available: true,
+      description:
+        'Find OCR-ed receipts/invoices of this company. Candidates only (scores are ranking signals, never confidence); all are needs_review.',
+      args: z
+        .object({
+          query: z.string().min(2).max(500),
+          date: Day.optional(),
+          supplier: z.string().min(1).max(200).optional(),
+          limit: z.number().int().min(1).max(10).default(5),
+        })
+        .strict(),
+      handler: async (ctx, a) => {
+        const rows = await needRag(ctx).searchDocuments({
+          companyId: ctx.companyId, // sessiyadan; model seçə bilmir
+          query: a.query,
+          topK: a.limit,
+          date: a.date,
+          supplier: a.supplier,
+        });
+        return {
+          candidates: rows.map((r) => ({
+            documentId: r.document_id,
+            score: r.score,
+            reviewStatus: r.review_status,
+            supplier: r.fields.supplier ?? null,
+            date: r.fields.date ?? null,
+            total: r.fields.total_amount ?? null,
+            currency: r.fields.currency ?? null,
+            issues: r.validation?.issues ?? [],
+          })),
+          note:
+            rows.length === 0 ? 'No matching receipt found; try a supplier or date.' : undefined,
+        };
+      },
+    }),
+  );
+  registry.register(
+    defineTool({
+      name: 'receipts.get',
+      risk: 'read',
+      permission: PERMISSIONS.FILES_READ,
+      available: true,
+      description:
+        'Get one OCR-ed receipt with its validation issues. Values flagged unsafe are masked; never treat as verified or post without human approval.',
+      args: z.object({ documentId: Uuid }).strict(),
+      handler: async (ctx, a) => {
+        const d = await needRag(ctx).getDocument(ctx.companyId, a.documentId);
+        if (!d) return { error: 'NOT_FOUND' };
+        return {
+          documentId: d.document_id,
+          reviewStatus: d.review_status,
+          fields: { ...d.fields, raw_text: clip(d.fields.raw_text) },
+          validation: d.validation ?? null,
+        };
+      },
+    }),
+  );
+  registry.register(
+    defineTool({
+      name: 'receipts.ingest',
+      risk: 'low-write',
+      permission: PERMISSIONS.FILES_WRITE,
+      available: true,
+      description:
+        'OCR an already uploaded company file (image/PDF) and index it as a receipt for receipts.search. Creates no accounting entries.',
+      args: z.object({ fileId: Uuid }).strict(),
+      handler: async (ctx, a) => {
+        const rag = needRag(ctx);
+        if (!ctx.storage) throw new Error('storage is not configured');
+        const file = await ctx.repos.files.findById(ctx.companyId, a.fileId);
+        const version = file && (await ctx.repos.files.latestVersion(ctx.companyId, file.id));
+        if (!file || !version) return { error: 'NOT_FOUND' };
+        if (!/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(version.mime))
+          return { error: 'UNSUPPORTED_TYPE', mime: version.mime };
+        const bytes = await ctx.storage.get(version.storageKey);
+        const d = await rag.ingestDocument(ctx.companyId, bytes, file.name, version.mime);
+        return {
+          documentId: d.document_id,
+          reviewStatus: d.review_status,
+          issues: d.validation?.issues ?? [],
+        };
       },
     }),
   );
@@ -537,44 +701,38 @@ export function registerBuiltinTools(registry: ToolRegistry): void {
         handler: async () => ({ error: 'NOT_AVAILABLE' }),
       }),
     );
-  pending(
-    'import.preview',
-    'read',
-    PERMISSIONS.INVOICES_READ,
-    'Preview an import (1C / e-taxes / bank).',
+  registry.register(
+    defineTool({
+      name: 'vat.period_summary',
+      risk: 'read',
+      permission: PERMISSIONS.VAT_READ,
+      available: true,
+      description:
+        'VAT summary for a month (YYYY-MM): output/input VAT, payable, exempt and zero-rated turnover. Lists excluded (unvalidated) invoices and blockers.',
+      args: z.object({ period: z.string().regex(PERIOD_RE) }).strict(),
+      handler: async (ctx, a) =>
+        summaryJson(await computePeriodSummary(ctx.repos, ctx.companyId, a.period)),
+    }),
   );
-  pending(
-    'import.commit',
-    'moderate-write',
-    PERMISSIONS.INVOICES_WRITE,
-    'Commit a previewed import (approval required).',
-  );
-  pending(
-    'onec.export_entries',
-    'low-write',
-    PERMISSIONS.JOURNAL_READ,
-    'Create a 1C export file of entries.',
-  );
-  pending('vat.period_summary', 'read', PERMISSIONS.VAT_READ, 'VAT period summary.');
-  pending(
-    'ledger.submit_entries',
-    'moderate-write',
-    PERMISSIONS.JOURNAL_WRITE,
-    'Submit proposed journal entries (approval required).',
-  );
-  pending('excel.profile', 'read', PERMISSIONS.FILES_READ, 'Profile an Excel file.');
-  pending('excel.query', 'read', PERMISSIONS.FILES_READ, 'Query an Excel file.');
-  pending(
-    'excel.generate_report',
-    'low-write',
-    PERMISSIONS.FILES_WRITE,
-    'Generate a new Excel report (original unchanged).',
-  );
-  pending(
-    'reconcile.run',
-    'low-write',
-    PERMISSIONS.JOURNAL_READ,
-    'Run a reconciliation (result is a proposal).',
+  registry.register(
+    defineTool({
+      name: 'ledger.submit_entries',
+      risk: 'moderate-write',
+      permission: PERMISSIONS.JOURNAL_WRITE,
+      available: true,
+      description:
+        'Post a PROPOSED journal entry. Always requires approval by a different authorised user before it runs.',
+      args: z.object({ entryId: Uuid }).strict(),
+      preview: (a) => `Post journal entry ${a.entryId}`,
+      handler: async (ctx, a) => {
+        if (!ctx.approvedBy) throw new Error('posting without an approver');
+        const approver = ctx.approvedBy;
+        const e = await ctx.db.tx((tx) =>
+          postEntry(createRepos(tx), ctx.companyId, a.entryId, approver, ctx.now),
+        );
+        return { entryId: e.id, status: e.status };
+      },
+    }),
   );
   pending('vat_return.draft', 'low-write', PERMISSIONS.VAT_WRITE, 'Draft a VAT return.');
   registry.register(
@@ -615,6 +773,191 @@ export function registerBuiltinTools(registry: ToolRegistry): void {
           model: s.model,
           status: 'suggestion_only',
         };
+      },
+    }),
+  );
+
+  // ------------------------------------------------ B12: Excel / import / uzlaşma
+  registry.register(
+    defineTool({
+      name: 'import.preview',
+      risk: 'read',
+      permission: PERMISSIONS.EXCEL_USE,
+      available: true,
+      description:
+        'Preview an import (1c | etaxes | bank) of an uploaded file. Nothing is written; returns valid/invalid row counts and an importId for import.commit.',
+      args: z
+        .object({
+          source: z.enum(['1c', 'etaxes', 'bank']),
+          fileId: Uuid,
+          defaultDirection: z.enum(['sales', 'purchase']).optional(),
+        })
+        .strict(),
+      handler: async (ctx, a) => {
+        const out = await previewImport(
+          { repos: ctx.repos, storage: ctx.storage! },
+          { companyId: ctx.companyId, userId: ctx.userId, ...a },
+        );
+        return {
+          importId: out.importId,
+          template: out.preview.template,
+          rowsOk: out.preview.rowsOk,
+          rowsFailed: out.preview.rowsFailed,
+          errors: out.preview.rows
+            .filter((r) => !r.ok)
+            .slice(0, 20)
+            .map((r) => ({ row: r.row, errors: r.errors })),
+        };
+      },
+    }),
+  );
+  registry.register(
+    defineTool({
+      name: 'import.commit',
+      risk: 'moderate-write',
+      permission: PERMISSIONS.IMPORTS_COMMIT,
+      available: true,
+      description:
+        'Apply a previewed import. ALWAYS needs approval by a different authorised user.',
+      args: z.object({ importId: Uuid }).strict(),
+      preview: (a) => `Commit import ${a.importId}`,
+      handler: async (ctx, a) => {
+        if (!ctx.approvedBy) throw new Error('commit without an approver');
+        return ctx.db.tx((tx) =>
+          commitImport(createRepos(tx), ctx.companyId, a.importId, ctx.userId),
+        );
+      },
+    }),
+  );
+  registry.register(
+    defineTool({
+      name: 'onec.export_entries',
+      risk: 'low-write',
+      permission: PERMISSIONS.JOURNAL_READ,
+      available: true,
+      description: 'Create a NEW 1C export file with the POSTED journal entries of a date range.',
+      args: z.object({ from: Day, to: Day }).strict(),
+      handler: async (ctx, a) =>
+        exportEntries1c(
+          { repos: ctx.repos, db: ctx.db, storage: ctx.storage! },
+          ctx.companyId,
+          ctx.userId,
+          a.from,
+          a.to,
+        ),
+    }),
+  );
+  registry.register(
+    defineTool({
+      name: 'excel.profile',
+      risk: 'read',
+      permission: PERMISSIONS.EXCEL_USE,
+      available: true,
+      description:
+        'Profile an uploaded XLSX/CSV file: column types, distinct counts, exact sums, duplicate and empty rows.',
+      args: z.object({ fileId: Uuid }).strict(),
+      handler: async (ctx, a) => {
+        const t = await loadTable(
+          { repos: ctx.repos, storage: ctx.storage! },
+          ctx.companyId,
+          a.fileId,
+        );
+        return { ...profileTable(t.headers, t.rows), truncated: t.truncated };
+      },
+    }),
+  );
+  registry.register(
+    defineTool({
+      name: 'excel.query',
+      risk: 'read',
+      permission: PERMISSIONS.EXCEL_USE,
+      available: true,
+      description:
+        'Read rows of an uploaded XLSX/CSV file, optionally filtered by a column value (max 50 rows). Never modifies the file.',
+      args: z
+        .object({
+          fileId: Uuid,
+          column: z.string().max(100).optional(),
+          equals: z.string().max(200).optional(),
+          limit: z.number().int().min(1).max(50).default(20),
+        })
+        .strict(),
+      handler: async (ctx, a) => {
+        const t = await loadTable(
+          { repos: ctx.repos, storage: ctx.storage! },
+          ctx.companyId,
+          a.fileId,
+        );
+        let rows = t.rows;
+        if (a.column !== undefined) {
+          const i = t.headers.findIndex((h) => h.toLowerCase() === a.column!.toLowerCase());
+          if (i === -1) return { error: 'UNKNOWN_COLUMN', columns: t.headers };
+          if (a.equals !== undefined)
+            rows = rows.filter((r) => (r[i] ?? '').toLowerCase() === a.equals!.toLowerCase());
+        }
+        return { headers: t.headers, totalMatching: rows.length, rows: rows.slice(0, a.limit) };
+      },
+    }),
+  );
+  registry.register(
+    defineTool({
+      name: 'excel.generate_report',
+      risk: 'low-write',
+      permission: PERMISSIONS.EXCEL_USE,
+      available: true,
+      description:
+        'Generate a NEW Excel report (invoices or journal) for a date range. Originals are never changed.',
+      args: z.object({ template: z.enum(['invoices', 'journal']), from: Day, to: Day }).strict(),
+      handler: async (ctx, a) => {
+        const jobId = await ctx.repos.excel.createJob({
+          companyId: ctx.companyId,
+          userId: ctx.userId,
+          operation: 'report',
+          inputFileId: null,
+          params: a,
+        });
+        const out = await runExcelJob(
+          { db: ctx.db, repos: ctx.repos, storage: ctx.storage! },
+          ctx.companyId,
+          jobId,
+        );
+        return { excelJobId: jobId, outputFileId: out.outputFileId, ...(out.result as object) };
+      },
+    }),
+  );
+  registry.register(
+    defineTool({
+      name: 'reconcile.run',
+      risk: 'low-write',
+      permission: PERMISSIONS.EXCEL_USE,
+      available: true,
+      description:
+        'Reconcile two sources (uploaded file / invoices / bank). The result is stored as PROPOSED matches that a human must confirm.',
+      args: z.object({ left: ReconSource, right: ReconSource }).strict(),
+      handler: async (ctx, a) => {
+        const deps = { repos: ctx.repos, storage: ctx.storage! };
+        const out = await runReconciliation(
+          deps,
+          ctx.companyId,
+          a.left as SourceSpec,
+          a.right as SourceSpec,
+        );
+        const id = await ctx.repos.excel.createRecon({
+          companyId: ctx.companyId,
+          userId: ctx.userId,
+          left: out.left,
+          right: out.right,
+          summary: out.summary,
+          matches: out.matches.map((m) => ({
+            type: m.type,
+            confidence: m.confidence.toFixed(3),
+            left: refJson(m.left),
+            right: refJson(m.right),
+            difference: m.difference ? formatAmount(m.difference) : null,
+            explanation: m.explanation,
+          })),
+        });
+        return { reconciliationId: id, status: 'proposed', summary: out.summary };
       },
     }),
   );

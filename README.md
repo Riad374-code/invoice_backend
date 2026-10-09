@@ -9,11 +9,18 @@ See its [handoff guide](modules/lexaudit_rag/RAG_INTEGRATION.md) for the four to
 setup and validation. It contains a prepared Azerbaijani Tax Code index; no private
 receipts or API keys are included.
 
-This contribution does not wire the module into the TypeScript backend yet.
-The prototype uses 384-dimensional multilingual-E5-small vectors; the backend
-expects 1,024-dimensional vectors (`backend/src/rag/clients.ts`). Keep the stores
-separate or rebuild embeddings with a consistent model before importing vectors.
-The Python receipt schema also differs from `ExtractedInvoiceSchema`: do not
-invent missing buyer, invoice number, net/VAT fields or confidence scores to satisfy
-that contract. The main backend must authenticate company scope, map reviewed
-fields, and own draft creation/approval.
+The module is wired into the TypeScript backend through an HTTP sidecar
+(`modules/lexaudit_rag/service.py`, run with
+`LEXAUDIT_SERVICE_TOKEN=... uvicorn service:app --port 8002`). Set
+`RAG_OCR_BASE_URL` and `RAG_OCR_TOKEN` in the backend to enable it:
+
+- scanned PDFs / images are OCR-ed through `POST /v1/ocr` (stateless, replaces the
+  model-serving OCR; other model-serving features still use `MODEL_SERVING_BASE_URL`);
+- agent tools `regulations.search`, `receipts.search`, `receipts.get`,
+  `receipts.ingest` (company id always taken from the session, files by id not path).
+
+The prototype uses 384-dimensional E5 vectors in its own store; the backend's pgvector
+index stays separate (1,024 dims). Receipt records are never mapped to
+`ExtractedInvoiceSchema` (buyer, number, net/VAT lines would have to be invented);
+they remain `needs_review` evidence for the agent. The sidecar stores receipts on
+local disk (single process) and must not be exposed publicly.

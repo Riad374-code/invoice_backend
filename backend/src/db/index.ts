@@ -1,12 +1,15 @@
 import type { Db } from './client.js';
 import { AssistantRepository } from './repos/assistant.js';
+import { ExcelRepository } from './repos/excel.js';
 import { LedgerRepository } from './repos/ledger.js';
 import { VatRepository } from './repos/vat.js';
+import { AdminRepository } from './repos/admin.js';
 import { ApprovalRepository } from './repos/approvals.js';
 import { AuditRepository } from './repos/audit.js';
 import { ChunkRepository } from './repos/chunks.js';
 import { CompanyRepository } from './repos/companies.js';
 import { FileRepository } from './repos/files.js';
+import { ImpactRepository } from './repos/impact.js';
 import { IngestionRepository } from './repos/ingestion.js';
 import { InvoiceRepository } from './repos/invoices.js';
 import { JobRepository } from './repos/jobs.js';
@@ -37,6 +40,9 @@ export interface Repos {
   assistant: AssistantRepository;
   ledger: LedgerRepository;
   vat: VatRepository;
+  excel: ExcelRepository;
+  impact: ImpactRepository;
+  admin: AdminRepository;
 }
 
 export function createRepos(db: Db): Repos {
@@ -56,5 +62,8 @@ export function createRepos(db: Db): Repos {
     assistant: new AssistantRepository(db),
     ledger: new LedgerRepository(db),
     vat: new VatRepository(db),
+    excel: new ExcelRepository(db),
+    impact: new ImpactRepository(db),
+    admin: new AdminRepository(db),
   };
 }

@@ -38,3 +38,12 @@ npm run openapi            # regenerates openapi.json (CI fails if it is out of 
 `src/plugins` auth/rate-limit/idempotency/audit-guard/metrics · `src/routes` HTTP · `src/jobs` Postgres queue + cron ·
 `src/storage` S3 · `src/documents` type detection/extraction · `src/audit` immutable log + PII masking.
 Every route must declare `config.public`, `config.authOnly` or `config.permission` — otherwise the server refuses to boot.
+
+## Demo / nümunə məlumat (deploy)
+
+`SEED_DEMO_DATA=true` və `DEMO_PASSWORD` (≥12 simvol) təyin edilərsə, açılışda ayrı **"Demo MMC"** şirkəti
+(VÖEN `0000000001`) yaranır: `admin|accountant|approver|viewer@demo.lexaudit.local`, hesab planı,
+4 uydurma qarşı tərəf, 6 nümunə qaimə və təklif olunan jurnal yazılışları (heç biri post olunmayıb).
+İdempotentdir, real şirkətlərin qeydiyyatını/məlumat daxiletməsini məhdudlaşdırmır. Dərəcələr cədvəli
+boşdursa 18% / 0% / azad nümunə ƏDV dərəcələri də əlavə olunur (hüquqi mənbəsiz — real dərəcələri
+admin konsolundan daxil edin). Demo məlumatı silmək üçün demo şirkət silinir.

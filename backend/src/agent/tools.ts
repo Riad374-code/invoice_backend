@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { Db, Repos } from '../db/index.js';
 import type { PermissionCode } from '../domain/index.js';
 import type { ToolSpec } from '../llm/client.js';
+import type { ObjectStorage } from '../storage/index.js';
+import type { RagOcrClient } from '../ragocr/client.js';
 import type { ModelServing } from '../models/client.js';
 import type { SourceHit } from '../rag/citations.js';
 import type { SearchRequest, SearchResult } from '../rag/search.js';
@@ -36,6 +38,10 @@ export interface ToolContext {
   ) => Promise<SearchResult>;
   sources: SourceAccumulator;
   models?: ModelServing | undefined;
+  ragOcr?: RagOcrClient | undefined;
+  storage?: ObjectStorage | undefined;
+  /** Təsdiqdən sonra icrada: təsdiqi verən istifadəçi */
+  approvedBy?: string | undefined;
   now: Date;
 }
 

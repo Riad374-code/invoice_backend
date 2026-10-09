@@ -43,6 +43,11 @@ export async function seedDevAdmin(db: Db, seed: DevSeed): Promise<{ created: bo
   const admin = await repos.roles.findRoleByName('admin');
   if (!admin) throw new Error('System role "admin" missing — run migrations first');
   await repos.roles.assignRoleToUser(user.id, admin.id);
+  // Dev-də bu şirkət platforma operatoru sayılır (qlobal dərəcə təkliflərini o təsdiqləyir). Production-da əl ilə təyin olunur.
+  await db.query(
+    `UPDATE companies SET is_platform = TRUE WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM companies WHERE is_platform)`,
+    [company.id],
+  );
   return { created: true };
 }
 

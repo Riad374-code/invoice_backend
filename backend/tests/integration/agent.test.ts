@@ -263,7 +263,7 @@ describe('Tool Gateway — the model only proposes', () => {
     const names = llm.requests[0]!.tools!.map((t) => t.function.name);
     expect(names).toContain('vat__calculate');
     expect(names).not.toContain('test__write_thing'); // viewer-də journal:write yoxdur
-    expect(names).not.toContain('ledger__submit_entries'); // hələ mövcud deyil
+    expect(names).not.toContain('vat_return__draft'); // hələ mövcud deyil
     const paramNames = llm.requests[0]!.tools!.flatMap((t) =>
       Object.keys((t.function.parameters as { properties?: object }).properties ?? {}),
     );
@@ -291,7 +291,7 @@ describe('Tool Gateway — the model only proposes', () => {
     llm.script(
       useTools(
         call('db.run_sql', { sql: 'DROP TABLE users' }, 'a'),
-        call('ledger.submit_entries', {}, 'b'),
+        call('vat_return.draft', {}, 'b'),
         call('vat.calculate', '{not json', 'c'),
         call('vat.calculate', '[1,2]', 'd'),
       ),
@@ -303,7 +303,7 @@ describe('Tool Gateway — the model only proposes', () => {
     );
     expect(msgs).toEqual(['unknown_tool', 'unavailable', 'invalid_arguments', 'invalid_arguments']);
     const names = (await runs()).filter((r) => r.status === 'rejected').map((r) => r.toolName);
-    expect(names).toEqual(expect.arrayContaining(['db.run_sql', 'ledger.submit_entries']));
+    expect(names).toEqual(expect.arrayContaining(['db.run_sql', 'vat_return.draft']));
   });
 
   it('enforces the USER’s permission even if the model calls a tool it was never offered', async () => {
