@@ -5,6 +5,9 @@ import threading
 
 from receipt_rag import search_receipts, company_folder, ingest_receipt
 from receipt_validation import reviewed_record
+import numpy as np
+from collections import defaultdict
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Initialize once instead of loading E5 for every request.
 _retriever = None
@@ -21,23 +24,154 @@ def get_retriever():
         return _retriever
 
 
+_hybrid_cache = None
+
+
+def get_hybrid_index():
+    global _hybrid_cache
+
+    if _hybrid_cache is not None:
+        return _hybrid_cache
+
+    retriever = get_retriever()
+    chunks = retriever.chunks
+
+    print("Building hybrid legal search index...")
+
+    vectorizer = TfidfVectorizer(
+        analyzer="char",
+        ngram_range=(3, 5),
+        min_df=2,
+        max_features=100000,
+    )
+
+    matrix = vectorizer.fit_transform([
+        c["embedding_text"] for c in chunks
+    ])
+
+    article_indices = defaultdict(list)
+
+    for i, chunk in enumerate(chunks):
+        article_indices[chunk["article"]].append(i)
+
+    _hybrid_cache = (
+        retriever,
+        vectorizer,
+        matrix,
+        dict(article_indices),
+    )
+
+    return _hybrid_cache
+
+
 def search_regulations(
     question: str,
     top_k: int = 8,
 ) -> list[dict]:
-    """
-    Search official Azerbaijani legislation.
 
-    Returns relevant legal passages with their
-    article numbers, source URLs, and citation IDs.
-    """
-
-    retriever = get_retriever()
-
-    return retriever.search(
-        question=question,
-        top_k=top_k,
+    retriever, vectorizer, matrix, article_indices = (
+        get_hybrid_index()
     )
+
+    # 1. E5 semantic similarity
+    query_vector = retriever.model.encode(
+        "query: " + question,
+        normalize_embeddings=True,
+        convert_to_numpy=True,
+    )
+
+    e5_scores = retriever.embeddings @ query_vector
+
+    # 2. TF-IDF lexical similarity
+    keyword_query = vectorizer.transform([question])
+
+    tfidf_scores = (
+        keyword_query @ matrix.T
+    ).toarray().ravel()
+
+    # 3. Aggregate chunk scores into article scores
+    e5_article_scores = {}
+    tfidf_article_scores = {}
+
+    for article, indices in article_indices.items():
+        e5_article_scores[article] = max(
+            float(e5_scores[i]) for i in indices
+        )
+
+        tfidf_article_scores[article] = max(
+            float(tfidf_scores[i]) for i in indices
+        )
+
+    depth = max(10, top_k)
+
+    e5_ranking = sorted(
+        article_indices,
+        key=lambda a: e5_article_scores[a],
+        reverse=True,
+    )[:depth]
+
+    tfidf_ranking = sorted(
+        article_indices,
+        key=lambda a: tfidf_article_scores[a],
+        reverse=True,
+    )[:depth]
+
+    # 4. Reciprocal Rank Fusion
+    rrf_scores = defaultdict(float)
+
+    for ranking in (e5_ranking, tfidf_ranking):
+        for rank, article in enumerate(ranking, 1):
+            rrf_scores[article] += 1.0 / (60 + rank)
+
+    final_articles = sorted(
+        rrf_scores,
+        key=lambda a: (-rrf_scores[a], a),
+    )[:top_k]
+
+    # 5. Return supporting passages
+    results = []
+
+    for article in final_articles:
+        indices = article_indices[article]
+
+        semantic_idx = max(
+            indices,
+            key=lambda i: e5_scores[i],
+        )
+
+        keyword_idx = max(
+            indices,
+            key=lambda i: tfidf_scores[i],
+        )
+
+        chunk = retriever.chunks[semantic_idx]
+
+        # Include lexical evidence if it differs.
+        evidence_indices = list(dict.fromkeys([
+            semantic_idx,
+            keyword_idx,
+        ]))
+
+        passages = [
+            {
+                "id": retriever.chunks[i]["id"],
+                "text": retriever.chunks[i]["text"],
+            }
+            for i in evidence_indices
+        ]
+
+        results.append({
+            "id": chunk["id"],
+            "article": article,
+            "title": chunk["article_title"],
+            "text": chunk["text"],
+            "source_url": chunk["source_url"],
+            "score": float(rrf_scores[article]),
+            "score_type": "rrf",
+            "passages": passages,
+        })
+
+    return results
 
 
 
