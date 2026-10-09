@@ -49,38 +49,59 @@ jobs:
 
   docker-postgres:
     name: Integration against real PostgreSQL 16 + pgvector
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16
-        env:
-          POSTGRES_USER: lexaudit
-          POSTGRES_PASSWORD: lexaudit_ci
-          POSTGRES_DB: lexaudit
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U lexaudit"
-          --health-interval 5s --health-timeout 5s --health-retries 10
+    # This runner includes PostgreSQL 16. Avoid anonymous Docker Hub pulls:
+    # shared runner IPs hit the registry's rate limit before any tests can run.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
+      - name: Start PostgreSQL 16 with pgvector
+        run: |
+          sudo apt-get update -o Acquire::Retries=3
+          sudo apt-get install -y --no-install-recommends postgresql-16-pgvector
+          sudo systemctl start postgresql.service
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE ROLE lexaudit LOGIN SUPERUSER PASSWORD 'lexaudit_ci'"
+          sudo -u postgres createdb --owner=lexaudit lexaudit
+          pg_isready -h 127.0.0.1 -p 5432 -U lexaudit
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
+      # MinIO's old public images/downloads have been removed. Build the real
+      # upstream server at an immutable revision for these disposable CI tests.
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.13'
+          cache: false
+      - name: Cache the pinned MinIO test binary
+        id: minio-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/ci-bin/minio
+          key: ${{ runner.os }}-${{ runner.arch }}-minio-7aac2a2c5b7c882e68c1ce017d8256be2feea27f-go1.24.13
+      - name: Build MinIO from pinned upstream source
+        if: steps.minio-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/ci-bin"
+          GOBIN="$RUNNER_TEMP/ci-bin" go install github.com/minio/minio@7aac2a2c5b7c882e68c1ce017d8256be2feea27f
       - name: Start MinIO (S3-compatible) for the storage integration test
         run: |
-          docker run -d --name minio -p 9000:9000 \
-            -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
-            minio/minio server /data
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:9000/minio/health/ready && exit 0
+          MINIO_ROOT_USER=minioadmin MINIO_ROOT_PASSWORD=minioadmin \
+            "$RUNNER_TEMP/ci-bin/minio" server "$RUNNER_TEMP/minio-data" \
+            --address 127.0.0.1:9000 --console-address 127.0.0.1:9001 \
+            > "$RUNNER_TEMP/minio.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/minio.pid"
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:9000/minio/health/ready && exit 0
+            kill -0 "$(cat "$RUNNER_TEMP/minio.pid")" || break
             sleep 1
           done
+          cat "$RUNNER_TEMP/minio.log"
           echo "MinIO did not become ready" >&2; exit 1
       - name: Apply migrations to a clean database
         env:
@@ -95,3 +116,14 @@ jobs:
           TEST_DATABASE_URL: postgres://lexaudit:lexaudit_ci@localhost:5432/lexaudit
           TEST_S3_ENDPOINT: http://localhost:9000
         run: npx vitest run tests/integration/real-services.test.ts
+      - name: Show service logs on failure
+        if: failure()
+        run: |
+          if [ -f "$RUNNER_TEMP/minio.log" ]; then cat "$RUNNER_TEMP/minio.log"; fi
+          sudo journalctl -u postgresql@16-main --no-pager -n 100
+      - name: Stop the MinIO test server
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/minio.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/minio.pid")" || true
+          fi
