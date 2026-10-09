@@ -1,0 +1,69 @@
+{
+  "legal": [
+    {
+      "question": "Hansı xərclər gəlirdən çıxıla bilər?",
+      "articles": [
+        "109",
+        "113",
+        "108",
+        "118",
+        "119"
+      ]
+    },
+    {
+      "question": "ƏDV ödəyicisi kimlərdir?",
+      "articles": [
+        "157",
+        "154",
+        "158",
+        "65",
+        "175"
+      ]
+    },
+    {
+      "question": "Gəlir vergisindən hansı azadolmalar var?",
+      "articles": [
+        "227",
+        "102",
+        "106",
+        "218-1",
+        "212-1"
+      ]
+    },
+    {
+      "question": "Maddə 108 nə deyir?",
+      "articles": [
+        "108",
+        "155",
+        "125",
+        "57",
+        "38-1"
+      ]
+    },
+    {
+      "question": "Elektron qaimə-faktura nə vaxt verilir?",
+      "articles": [
+        "71-1",
+        "172",
+        "58",
+        "163",
+        "175"
+      ]
+    }
+  ],
+  "receipts": [
+    {
+      "query": "Yanacaq qəbzi",
+      "count": 1
+    },
+    {
+      "query": "Son aldığımız ofis ləvazimatlarını göstər",
+      "count": 0
+    },
+    {
+      "query": "24 sentyabr 2020 tarixində SOCAR-dan alınan yanacaq",
+      "count": 1
+    }
+  ],
+  "note": "Development smoke checks only. No live Gemini/OCR call and no accuracy benchmark."
+}

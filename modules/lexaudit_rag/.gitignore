@@ -1,0 +1,15 @@
+.venv/
+.env
+__pycache__/
+runtime/
+reports/
+
+data/receipts/
+backups/
+
+.DS_Store
+.env.*
+!.env.example
+:q
+examples/test_receipt.*
+*.pyc
