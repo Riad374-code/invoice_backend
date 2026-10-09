@@ -1,0 +1,27 @@
+{
+  "old_requirement": "Uydurma qayda: Şirkət müştəri şikayətinin qəbul edildiyini beş iş günü ərzində müştəriyə bildirməlidir. Şikayətin həlli ayrıca prosesdir.",
+  "new_requirement": "Uydurma qayda: Şirkət müştəri şikayətinin qəbul edildiyini iki iş günü ərzində müştəriyə bildirməlidir. Şikayətin həlli ayrıca prosesdir.",
+  "effective_date": null,
+  "language": "az",
+  "scenario": "fictional",
+  "documents": [
+    {
+      "document_id": "procedure_a",
+      "title": "Prosedur A — əvvəlki qəbul qaydası",
+      "source_location": "Bölmə 4.2",
+      "text": "Müştəri şikayətinin qəbul edildiyi beş iş günü ərzində müştəriyə bildirilməlidir."
+    },
+    {
+      "document_id": "procedure_b",
+      "title": "Prosedur B — yenilənmiş qəbul qaydası",
+      "source_location": "Bölmə 3.1",
+      "text": "Müştəri şikayətinin qəbul edildiyi iki iş günü ərzində müştəriyə bildirilməlidir."
+    },
+    {
+      "document_id": "resolution",
+      "title": "Şikayətlərin həlli proseduru",
+      "source_location": "Bölmə 6",
+      "text": "Müştəri şikayətləri 30 təqvim günü ərzində həll edilməlidir."
+    }
+  ]
+}

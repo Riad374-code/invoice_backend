@@ -1,0 +1,9 @@
+{
+  "model": "intfloat/multilingual-e5-small",
+  "chunks": 482,
+  "embedding_dimension": 384,
+  "index_version": 2,
+  "max_input_tokens": 512,
+  "chunks_sha256": "7e821451f313e2e0285fa2e96f94f849683f1b0ca8a4724067ca421ef5f915cd",
+  "embeddings_sha256": "896a4e0fcadfd8e9b65ad5a603a98751829a4bc8fd1a8fb037b4d21c49460a47"
+}

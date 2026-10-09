@@ -1,0 +1,27 @@
+{
+  "old_requirement": "Fictional rule: The company must acknowledge receipt of a customer complaint within five business days. Complaint resolution remains a separate process.",
+  "new_requirement": "Fictional rule: The company must acknowledge receipt of a customer complaint within two business days. Complaint resolution remains a separate process.",
+  "effective_date": null,
+  "language": "en",
+  "scenario": "fictional",
+  "documents": [
+    {
+      "document_id": "procedure_a",
+      "title": "Procedure A — earlier acknowledgement process",
+      "source_location": "Section 4.2",
+      "text": "Acknowledge receipt of a customer complaint within five business days."
+    },
+    {
+      "document_id": "procedure_b",
+      "title": "Procedure B — updated acknowledgement process",
+      "source_location": "Section 3.1",
+      "text": "Acknowledge receipt of a customer complaint within two business days."
+    },
+    {
+      "document_id": "resolution",
+      "title": "Complaint resolution procedure",
+      "source_location": "Section 6",
+      "text": "Resolve customer complaints within 30 calendar days."
+    }
+  ]
+}
