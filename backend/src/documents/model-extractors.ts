@@ -21,7 +21,7 @@ export function registerModelExtractors(
     if (!looksScanned(pdf)) return { text: pdf.text, layout: { method: 'text', pages: pdf.pages } };
     if (!models)
       throw new ExtractionFailedError(
-        'OCR_UNAVAILABLE: scanned PDF needs the OCR model (MODEL_SERVING_BASE_URL)',
+        'OCR_UNAVAILABLE: scanned PDF needs RAG_OCR_BASE_URL + RAG_OCR_TOKEN or an OCR-capable MODEL_SERVING_BASE_URL (see SETUP.md)',
       );
     const ocr = await ocrOrFail(models, buffer, mime);
     return {
@@ -37,7 +37,7 @@ export function registerModelExtractors(
   registry.register('image', async ({ buffer, mime }) => {
     if (!models)
       throw new ExtractionFailedError(
-        'OCR_UNAVAILABLE: images need the OCR model (MODEL_SERVING_BASE_URL)',
+        'OCR_UNAVAILABLE: images need RAG_OCR_BASE_URL + RAG_OCR_TOKEN or an OCR-capable MODEL_SERVING_BASE_URL (see SETUP.md)',
       );
     const ocr = await ocrOrFail(models, buffer, mime);
     return {

@@ -84,4 +84,39 @@ describe('loadConfig (§3: eksik secret → start olmur)', () => {
       expect((e as ConfigError).issues.length).toBeGreaterThanOrEqual(3);
     }
   });
+  it('requires the sidecar URL and token together instead of silently disabling it', () => {
+    expect(() => loadConfig({ ...GOOD, RAG_OCR_BASE_URL: 'http://127.0.0.1:8002' })).toThrow(
+      /RAG_OCR_BASE_URL and RAG_OCR_TOKEN must be set together/,
+    );
+    expect(() =>
+      loadConfig({ ...GOOD, RAG_OCR_TOKEN: 'test-token', RAG_OCR_BASE_URL: ' ' }),
+    ).toThrow(/must be set together/);
+    expect(loadConfig({ ...GOOD, RAG_OCR_BASE_URL: '', RAG_OCR_TOKEN: '' }).ragOcr).toBeUndefined();
+    expect(
+      loadConfig({
+        ...GOOD,
+        RAG_OCR_BASE_URL: ' http://127.0.0.1:8002/ ',
+        RAG_OCR_TOKEN: 'test-token',
+      }).ragOcr,
+    ).toEqual({ baseUrl: 'http://127.0.0.1:8002/', token: 'test-token' });
+  });
+  it.each(['MODEL_SERVING_BASE_URL', 'RAG_OCR_BASE_URL'])(
+    'validates the %s service origin',
+    (name) => {
+      const env = name === 'RAG_OCR_BASE_URL' ? { ...GOOD, RAG_OCR_TOKEN: 'test-token' } : GOOD;
+      for (const value of [
+        'localhost:8002',
+        'ftp://host',
+        'http://user:secret@host',
+        'http://host/api/chat',
+        'http://host?key=secret',
+        'http://host/#fragment',
+      ]) {
+        expect(() => loadConfig({ ...env, [name]: value })).toThrow(
+          new RegExp(`${name} must be an HTTP`),
+        );
+      }
+      expect(() => loadConfig({ ...env, [name]: 'https://service.internal:8002' })).not.toThrow();
+    },
+  );
 });

@@ -27,12 +27,13 @@ services:
       S3_SECRET_KEY: minioadmin
       # Antivirus: `docker compose --profile av up` + CLAMAV_HOST=clamav (dev-də boş = söndürülüb)
       CLAMAV_HOST: ${CLAMAV_HOST:-}
-      MODEL_SERVING_BASE_URL: http://model-serving:8001
+      MODEL_SERVING_BASE_URL: ${MODEL_SERVING_BASE_URL:-}
+      MODEL_SERVING_API_KEY: ${MODEL_SERVING_API_KEY:-}
       # Demo məlumat: ayrı "Demo MMC" şirkəti (admin|accountant|approver|viewer@demo.lexaudit.local).
       # Defolt parol YALNIZ lokal dev üçündür; ictimai deploy-da .env ilə mütləq dəyişin.
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
       DEMO_PASSWORD: ${DEMO_PASSWORD:-Demo-Passw0rd-2026}
-      # Python RAG/OCR sidecar (modules/lexaudit_rag/service.py); ikisi də verilməsə söndürülüb
+      # Python RAG/OCR sidecar: set both URL and token, or leave both empty.
       RAG_OCR_BASE_URL: ${RAG_OCR_BASE_URL:-}
       RAG_OCR_TOKEN: ${RAG_OCR_TOKEN:-}
     ports:
@@ -87,10 +88,11 @@ services:
       retries: 10
       start_period: 180s
 
-  # Dev stub for model-training/serving (OpenAI-compatible internal HTTP API).
-  # Real service lives in model-training/serving and is reached over the internal network.
+  # Connectivity-only echo stub. It DOES NOT implement model inference or /v1 contracts.
+  # Opt in with --profile model-stub; never use it as MODEL_SERVING_BASE_URL.
   model-serving:
     image: hashicorp/http-echo:latest
+    profiles: ['model-stub']
     container_name: lexaudit-model-serving-stub
     command: ['-listen=:8001', '-text=model-serving dev stub']
     ports:

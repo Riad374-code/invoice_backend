@@ -29,8 +29,10 @@ sources = search_regulations("Hansı xərclər gəlirdən çıxıla bilər?", to
 
 Bind the authenticated company ID in the main backend's tool wrappers. A model
 must not choose another company or an arbitrary server file path. This is a
-local Python integration; your friend can import it into the agent backend or
-expose authenticated routes from that backend. No network API was added here.
+local Python integration. For the TypeScript backend, `service.py` exposes these tools over
+authenticated HTTP; see [SETUP.md](../../SETUP.md#3-ai-service-connections) for the URL/token wiring.
+`api.py` is the separate quick demo API. Neither app implements the full backend's model-serving
+contracts (`/v1/chat/completions`, `/v1/extract/invoice`, classification, embeddings and reranking).
 
 - `search_regulations` returns one primary passage per article. `related_passages`
   includes the article's first passage and immediate neighbors. Each has its own

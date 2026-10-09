@@ -158,6 +158,32 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   }
   if (e.JWT_SECRET === e.CSRF_SECRET) issues.push('JWT_SECRET and CSRF_SECRET must differ');
 
+  if (Boolean(e.RAG_OCR_BASE_URL) !== Boolean(e.RAG_OCR_TOKEN)) {
+    issues.push('RAG_OCR_BASE_URL and RAG_OCR_TOKEN must be set together (see SETUP.md)');
+  }
+  for (const [name, value] of [
+    ['MODEL_SERVING_BASE_URL', e.MODEL_SERVING_BASE_URL],
+    ['RAG_OCR_BASE_URL', e.RAG_OCR_BASE_URL],
+  ] as const) {
+    if (!value) continue;
+    try {
+      const url = new URL(value);
+      if (
+        !['http:', 'https:'].includes(url.protocol) ||
+        url.username ||
+        url.password ||
+        url.pathname !== '/' ||
+        url.search ||
+        url.hash
+      )
+        throw new Error('not an HTTP origin');
+    } catch {
+      issues.push(
+        `${name} must be an HTTP(S) origin without credentials, a path, query or fragment`,
+      );
+    }
+  }
+
   const bindAddr = e.BIND_ADDR ?? (e.PORT ? `0.0.0.0:${e.PORT}` : '0.0.0.0:8080');
   const bind = /^(.*):(\d{1,5})$/.exec(bindAddr);
   const port = bind ? Number(bind[2]) : NaN;

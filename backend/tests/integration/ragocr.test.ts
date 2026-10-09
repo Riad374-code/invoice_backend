@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { registerBuiltinTools } from '../../src/agent/builtin-tools.js';
 import { SourceAccumulator, ToolRegistry, type ToolContext } from '../../src/agent/tools.js';
-import { ModelResponseError } from '../../src/models/client.js';
+import { HttpModelServing, ModelResponseError } from '../../src/models/client.js';
 import { UpstreamError } from '../../src/rag/clients.js';
 import { HttpRagOcr, withRagOcr, type RagOcrClient } from '../../src/ragocr/client.js';
 
@@ -53,6 +53,62 @@ describe('HttpRagOcr', () => {
     const models = withRagOcr(undefined, c);
     expect(await models.ocr(Buffer.from('x'), 'image/png')).toMatchObject({ text: 'çek mətni' });
     await expect(models.classifyNews('x')).rejects.toBeInstanceOf(UpstreamError);
+  });
+  it('preserves real model-client methods and their instance when adding sidecar OCR', async () => {
+    const requests: string[] = [];
+    const base = new HttpModelServing({
+      baseUrl: 'http://models.local',
+      apiKey: 'model-token',
+      fetchImpl: (async (url: URL, init: RequestInit) => {
+        expect((init.headers as Record<string, string>).authorization).toBe('Bearer model-token');
+        requests.push(url.pathname);
+        if (url.pathname === '/v1/models') return jsonRes({ data: [{ id: 'fixture-model' }] });
+        if (url.pathname === '/v1/classify/news')
+          return jsonRes({
+            category: 'tax',
+            riskLevel: 'low',
+            summary: 'Fixture',
+            model: 'fixture-model',
+          });
+        if (url.pathname === '/v1/classify/account')
+          return jsonRes({ accountCode: '721', confidence: 0.7, model: 'fixture-model' });
+        return jsonRes({
+          invoice: {
+            number: 'INV-1',
+            issueDate: '2026-10-09',
+            seller: { name: 'Seller' },
+            buyer: { name: 'Buyer' },
+            lines: [{ description: 'Paper', qty: '1', unitPrice: '10', net: '10', vat: '0' }],
+          },
+          overallConfidence: 0.7,
+          model: 'fixture-model',
+        });
+      }) as unknown as typeof fetch,
+    });
+    const { c, calls } = client(() => jsonRes({ text: 'sidecar text', model: 'ocr-model' }));
+    const models = withRagOcr(base, c);
+    expect(await models.extractInvoice('invoice text')).toMatchObject({ model: 'fixture-model' });
+    expect(await models.classifyNews('news text')).toMatchObject({ category: 'tax' });
+    expect(
+      await models.classifyAccount({
+        description: 'Paper',
+        direction: 'purchase',
+        standard: 'MMUS',
+      }),
+    ).toMatchObject({ accountCode: '721' });
+    expect(await models.listModels?.()).toEqual([{ id: 'fixture-model' }]);
+    expect(await models.ocr(Buffer.from('scan'), 'image/png')).toEqual({
+      text: 'sidecar text',
+      model: 'ocr-model',
+    });
+    expect(requests).toEqual([
+      '/v1/extract/invoice',
+      '/v1/classify/news',
+      '/v1/classify/account',
+      '/v1/models',
+    ]);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.url.pathname).toBe('/v1/ocr');
   });
 });
 
