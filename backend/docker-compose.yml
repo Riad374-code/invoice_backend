@@ -1,0 +1,54 @@
+name: lexaudit-dev
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: lexaudit-postgres
+    environment:
+      POSTGRES_USER: lexaudit
+      POSTGRES_PASSWORD: lexaudit_dev
+      POSTGRES_DB: lexaudit
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=vector
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lexaudit"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: lexaudit-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Dev stub for model-training/serving (OpenAI-compatible internal HTTP API).
+  # Real service lives in model-training/serving and is reached over the internal network.
+  model-serving:
+    image: hashicorp/http-echo:latest
+    container_name: lexaudit-model-serving-stub
+    command: ["-listen=:8001", "-text=model-serving dev stub"]
+    ports:
+      - "8001:8001"
+
+volumes:
+  pgdata:
+  miniodata:

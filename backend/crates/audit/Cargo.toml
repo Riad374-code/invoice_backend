@@ -1,0 +1,20 @@
+[package]
+name = "lexaudit-audit"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+lexaudit-domain = { path = "../domain" }
+lexaudit-db = { path = "../db" }
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+regex.workspace = true
+thiserror.workspace = true
+once_cell.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true }
